@@ -5,6 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
+import os
 
 GARRAFAS_POR_LITRO = 3710 / 1000 
 
@@ -12,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = 'chave_secreta_para_flash'
 
 # Configuração do banco de dados SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///pedidos.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("postgresql://cervejaria_db_user:f0aRZjyre8kA6YkVye3F0Qqzlu7rR9yT@dpg-d1i6b6adbo4c7387plk0-a.oregon-postgres.render.com/cervejaria_db")
 db = SQLAlchemy(app)
 
 RECEITAS = {
