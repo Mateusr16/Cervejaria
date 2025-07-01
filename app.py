@@ -6,15 +6,19 @@ from sqlalchemy import func
 from collections import defaultdict
 from dateutil.relativedelta import relativedelta
 import os
+import re
 
 GARRAFAS_POR_LITRO = 3710 / 1000 
 
 app = Flask(__name__)
 app.secret_key = 'chave_secreta_para_flash'
 
-# Configuração do banco de dados SQLite
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("postgresql://cervejaria_db_user:f0aRZjyre8kA6YkVye3F0Qqzlu7rR9yT@dpg-d1i6b6adbo4c7387plk0-a.oregon-postgres.render.com/cervejaria_db")
-db = SQLAlchemy(app)
+# Corrige o prefixo da URL se necessário
+db_url = os.getenv("DATABASE_URL", "postgresql://cervejaria_db_user:f0aRZjyre8kA6YkVye3F0Qqzlu7rR9yT@dpg-d1i6b6adbo4c7387plk0-a.oregon-postgres.render.com/cervejaria_db")
+if db_url.startswith("postgres://"):
+    db_url = re.sub("^postgres://", "postgresql://", db_url)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 
 RECEITAS = {
     "Pilsen": {
