@@ -45,11 +45,57 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
+        
+        /* Mobile Menu */
+        .mobile-menu-button {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-button {
+                display: block;
+            }
+            
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                bottom: 0;
+                z-index: 50;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.mobile-open {
+                left: 0;
+            }
+            
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0,0,0,0.5);
+                z-index: 40;
+            }
+            
+            .sidebar-overlay.mobile-open {
+                display: block;
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-50">
     <div class="flex h-screen overflow-hidden">
+        <!-- Mobile Menu Overlay -->
+        <div class="sidebar-overlay"></div>
+        
         <!-- Sidebar -->
         <div class="sidebar bg-maltheus-dark text-white w-64 flex flex-col">
             <div class="p-4 flex items-center justify-between border-b border-maltheus-primary">
@@ -59,6 +105,9 @@
                             class="w-20 h-20 object-contain">
                     <span class="text-xl font-bold">Maltheus Brew</span>
                 </div>
+                <button class="md:hidden text-white close-mobile-menu">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             
             <div class="flex-1 overflow-y-auto py-4">
@@ -127,45 +176,49 @@
             <!-- Top Bar -->
             <header class="bg-white shadow-sm">
                 <div class="px-6 py-4 flex items-center justify-between">
-                    <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                    <div class="flex items-center">
+                        <button class="mobile-menu-button mr-4 p-2 rounded-lg bg-maltheus-primary text-white">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                    </div>
                     <div class="flex items-center space-x-4">
-<!-- No header -->
-<div class="relative">
-    <a href="#notificacoes" class="p-2 text-gray-500 hover:text-gray-700 relative">
-        <i class="fas fa-bell"></i>
-        {% if producoes_pendentes_count > 0 %}
-        <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-        {% endif %}
-    </a>
-    
-    <!-- Dropdown de notificações -->
-    <div id="notificacoes" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-10">
-        <div class="p-4 border-b">
-            <h3 class="font-bold">Produções Pendentes</h3>
-        </div>
-        <div class="max-h-60 overflow-y-auto">
-            {% for producao in producoes_pendentes %}
-            <div class="p-4 border-b hover:bg-gray-50">
-                <p class="font-medium">Lote {{ producao.lote }} - {{ producao.tipo_cerveja }}</p>
-                <p class="text-sm text-gray-500">Concluído em {{ producao.fim_producao.strftime('%d/%m/%Y') }}</p>
-                <form method="post" action="{{ url_for('confirmar_entrada', id=producao.id) }}" class="mt-2">
-                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded text-sm">
-                        Confirmar Entrada
-                    </button>
-                </form>
-            </div>
-            {% else %}
-            <p class="p-4 text-gray-500">Nenhuma produção pendente</p>
-            {% endfor %}
-        </div>
-    </div>
-</div>
+                        <div class="relative">
+                            <a href="#notificacoes" class="p-2 text-gray-500 hover:text-gray-700 relative">
+                                <i class="fas fa-bell"></i>
+                                {% if producoes_pendentes_count > 0 %}
+                                <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                                {% endif %}
+                            </a>
+                            
+                            <!-- Dropdown de notificações -->
+                            <div id="notificacoes" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-10">
+                                <div class="p-4 border-b">
+                                    <h3 class="font-bold">Produções Pendentes</h3>
+                                </div>
+                                <div class="max-h-60 overflow-y-auto">
+                                    {% for producao in producoes_pendentes %}
+                                    <div class="p-4 border-b hover:bg-gray-50">
+                                        <p class="font-medium">Lote {{ producao.lote }} - {{ producao.tipo_cerveja }}</p>
+                                        <p class="text-sm text-gray-500">Concluído em {{ producao.fim_producao.strftime('%d/%m/%Y') }}</p>
+                                        <form method="post" action="{{ url_for('confirmar_entrada', id=producao.id) }}" class="mt-2">
+                                            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded text-sm">
+                                                Confirmar Entrada
+                                            </button>
+                                        </form>
+                                    </div>
+                                    {% else %}
+                                    <p class="p-4 text-gray-500">Nenhuma produção pendente</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
             
             <!-- Dashboard Content -->
-            <main class="p-6">
+            <main class="p-4 md:p-6">
                 <!-- Welcome Banner -->
                 <div class="bg-gradient-to-r from-maltheus-dark to-maltheus-primary rounded-xl p-6 mb-6 text-white">
                     <div class="flex items-center justify-between">
@@ -173,7 +226,7 @@
                             <h2 class="text-2xl font-bold">Bem-vindo, Mateus!</h2>
                             <p class="mt-2">Acompanhe o desempenho da Maltheus Brew e gerencie sua produção artesanal.</p>
                         </div>
-                        <div class="beer-bottle">
+                        <div class="beer-bottle hidden md:block">
                             <img src="{{ url_for('static', filename='logo.png') }}" 
                                 alt="Logo" 
                                 class="h-24 opacity-20 object-contain">
@@ -182,12 +235,12 @@
                 </div>
                 
                 <!-- Stats Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    <div class="dashboard-card bg-white rounded-xl shadow p-6 transition duration-300">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="dashboard-card bg-white rounded-xl shadow p-4 md:p-6 transition duration-300">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-500">Valor do Estoque</p>
-                                <h3 class="text-2xl font-bold mt-1">R$ {{ "%.2f"|format(estoque_valor_total) }}</h3>
+                                <h3 class="text-xl md:text-2xl font-bold mt-1">R$ {{ "%.2f"|format(estoque_valor_total) }}</h3>
                             </div>
                             <div class="p-3 rounded-full bg-maltheus-light text-maltheus-primary">
                                 <i class="fas fa-industry text-xl"></i>
@@ -195,11 +248,11 @@
                         </div>
                     </div>
                     
-                    <div class="dashboard-card bg-white rounded-xl shadow p-6 transition duration-300">
+                    <div class="dashboard-card bg-white rounded-xl shadow p-4 md:p-6 transition duration-300">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-500">Vendas Mensais</p>
-                                <h3 class="text-2xl font-bold mt-1">R$ {{ "%.2f"|format(total_vendas) }}</h3>
+                                <h3 class="text-xl md:text-2xl font-bold mt-1">R$ {{ "%.2f"|format(total_vendas) }}</h3>
                                 {% if porcentagem_vendas > 0 %}
                                     <p class="text-green-500 text-sm mt-1">
                                         <i class="fas fa-arrow-up mr-1"></i> {{ "%.2f"|format(porcentagem_vendas) }}% desde o mês passado
@@ -216,11 +269,11 @@
                         </div>
                     </div>
                     
-                    <div class="dashboard-card bg-white rounded-xl shadow p-6 transition duration-300">
+                    <div class="dashboard-card bg-white rounded-xl shadow p-4 md:p-6 transition duration-300">
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-gray-500">Clientes Ativos</p>
-                                <h3 class="text-2xl font-bold mt-1">{{ clientes_ativos }}</h3>
+                                <h3 class="text-xl md:text-2xl font-bold mt-1">{{ clientes_ativos }}</h3>
                                 {% if variacao_clientes > 0 %}
                                     <p class="text-green-500 text-sm mt-1">
                                         <i class="fas fa-arrow-up mr-1"></i> 
@@ -241,39 +294,39 @@
                         </div>
                     </div>
                     
-                <div class="dashboard-card bg-white rounded-xl shadow p-6 transition duration-300">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-500">Perda de Estoque</p>
-                            <h3 class="text-2xl font-bold mt-1">R$ {{ "%.2f"|format(custo_perdas) }}</h3>
-                            <p class="text-red-500 text-sm mt-1">
-                                <i class="fas fa-arrow-down mr-1"></i> 
-                                {{ perdas_count }} registro(s) de perda
-                            </p>
-                        </div>
-                        <div class="p-3 rounded-full bg-red-100 text-red-500">
-                            <i class="fas fa-clock text-xl"></i>
+                    <div class="dashboard-card bg-white rounded-xl shadow p-4 md:p-6 transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Perda de Estoque</p>
+                                <h3 class="text-xl md:text-2xl font-bold mt-1">R$ {{ "%.2f"|format(custo_perdas) }}</h3>
+                                <p class="text-red-500 text-sm mt-1">
+                                    <i class="fas fa-arrow-down mr-1"></i> 
+                                    {{ perdas_count }} registro(s) de perda
+                                </p>
+                            </div>
+                            <div class="p-3 rounded-full bg-red-100 text-red-500">
+                                <i class="fas fa-clock text-xl"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
                 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="grid grid-cols-1 gap-6 mb-6">
                     <!-- Production Chart -->
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="font-bold text-lg">Venda por Região</h3>
-                            <select class="border rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-maltheus-primary">
+                    <div class="bg-white rounded-xl shadow p-4 md:p-6">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg mb-2 md:mb-0">Venda por Região</h3>
+                            <select class="border rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-maltheus-primary w-full md:w-auto">
                                 <option>Últimos 6 meses</option>
                             </select>
                         </div>
-                        <div class="h-64">
-                            <canvas id="vendasRegiaoChart"></canvas>
+                        <div class="h-64 overflow-x-auto">
+                            <canvas id="vendasRegiaoChart" class="min-w-[600px]"></canvas>
                         </div>
                     </div>
                     
                     <!-- Recent Activity -->
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <div class="bg-white rounded-xl shadow p-4 md:p-6">
                         <h3 class="font-bold text-lg mb-4">Atividades Recentes</h3>
                         <div class="space-y-4">
                             {% for atividade in atividades_recentes %}
@@ -292,42 +345,41 @@
                 </div>
                 
                 <!-- Recent Orders and Top Products -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 gap-6">
                     <!-- Recent Orders -->
                     <div class="bg-white rounded-xl shadow overflow-hidden">
-                        <div class="p-6 border-b">
+                        <div class="p-4 md:p-6 border-b">
                             <h3 class="font-bold text-lg">Pedidos Recentes</h3>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pedido</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Região</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                        <th class="px-4 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pedido</th>
+                                        <th class="px-4 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-4 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Região</th>
+                                        <th class="px-4 py-2 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                                     </tr>
                                 </thead>
-                                    <!-- Dentro da tabela de Pedidos Recentes -->
-                                    <tbody class="bg-white divide-y divide-gray-200">
-                                        {% for pedido in pedidos_recentes %}
-                                        <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-maltheus-dark">{{ pedido.numero_pedido }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ pedido.cliente }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                {% set estado = pedido.cidade_estado.split('- ')[1] %}
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                    {% if estado == 'SP' %}bg-blue-100 text-blue-800
-                                                    {% elif estado == 'RJ' %}bg-yellow-100 text-yellow-800
-                                                    {% elif estado == 'MG' %}bg-green-100 text-green-800
-                                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
-                                                    {{ estado }}
-                                                </span>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ pedido.valor_total }}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    {% for pedido in pedidos_recentes %}
+                                    <tr>
+                                        <td class="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap text-sm font-medium text-maltheus-dark">{{ pedido.numero_pedido }}</td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap text-sm text-gray-500">{{ pedido.cliente }}</td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap">
+                                            {% set estado = pedido.cidade_estado.split('- ')[1] %}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                {% if estado == 'SP' %}bg-blue-100 text-blue-800
+                                                {% elif estado == 'RJ' %}bg-yellow-100 text-yellow-800
+                                                {% elif estado == 'MG' %}bg-green-100 text-green-800
+                                                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                {{ estado }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-2 md:px-6 md:py-4 whitespace-nowrap text-sm text-gray-500">{{ pedido.valor_total }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
                             </table>
                         </div>
                         <div class="p-4 border-t text-center">
@@ -337,36 +389,36 @@
                     
                     <!-- Top Products -->
                     <div class="bg-white rounded-xl shadow overflow-hidden">
-                        <div class="p-6 border-b">
+                        <div class="p-4 md:p-6 border-b">
                             <h3 class="font-bold text-lg">Cervejas Mais Vendidas</h3>
                         </div>
-                            <div class="divide-y divide-gray-200">
-                                {% for cerveja in top_cervejas %}
-                                <div class="p-4 flex items-center">
-                                    <div class="w-10 h-10 rounded-full 
-                                        {% if cerveja[0] == 'ipa' %}bg-amber-900
-                                        {% elif cerveja[0] == 'stout' %}bg-amber-800
-                                        {% elif cerveja[0] == 'pilsen' %}bg-amber-600
-                                        {% else %}bg-amber-900{% endif %} 
-                                        flex items-center justify-center mr-3">
-                                        <i class="fas fa-beer text-white"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <h4 class="font-medium">Maltheus {{ cerveja[0]|upper }}</h4>
-                                        <p class="text-sm text-gray-500">
-                                            {% if cerveja[0] == 'ipa' %}India Pale Ale
-                                            {% elif cerveja[0] == 'stout' %}Irish Stout
-                                            {% elif cerveja[0] == 'pilsen' %}Pilsen Premium
-                                            {% else %}{{ cerveja[0] }}{% endif %}
-                                        </p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="font-medium">{{ cerveja[1] }} vendas</p>
-                                        <p class="text-sm text-green-500">+0% este mês</p>
-                                    </div>
+                        <div class="divide-y divide-gray-200">
+                            {% for cerveja in top_cervejas %}
+                            <div class="p-4 flex items-center">
+                                <div class="w-10 h-10 rounded-full 
+                                    {% if cerveja[0] == 'ipa' %}bg-amber-900
+                                    {% elif cerveja[0] == 'stout' %}bg-amber-800
+                                    {% elif cerveja[0] == 'pilsen' %}bg-amber-600
+                                    {% else %}bg-amber-900{% endif %} 
+                                    flex items-center justify-center mr-3">
+                                    <i class="fas fa-beer text-white"></i>
                                 </div>
-                                {% endfor %}
+                                <div class="flex-1">
+                                    <h4 class="font-medium">Maltheus {{ cerveja[0]|upper }}</h4>
+                                    <p class="text-sm text-gray-500">
+                                        {% if cerveja[0] == 'ipa' %}India Pale Ale
+                                        {% elif cerveja[0] == 'stout' %}Irish Stout
+                                        {% elif cerveja[0] == 'pilsen' %}Pilsen Premium
+                                        {% else %}{{ cerveja[0] }}{% endif %}
+                                    </p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="font-medium">{{ cerveja[1] }} vendas</p>
+                                    <p class="text-sm text-green-500">+0% este mês</p>
+                                </div>
                             </div>
+                            {% endfor %}
+                        </div>
                         <div class="p-4 border-t text-center">
                             <a href="/cervejas" class="text-maltheus-primary font-medium hover:underline">Ver todas as cervejas</a>
                         </div>
@@ -446,7 +498,38 @@
         }
     });
 
-        document.querySelector('[href="#notificacoes"]').addEventListener('click', function(e) {
+    // Menu mobile
+    const mobileMenuButton = document.querySelector('.mobile-menu-button');
+    const closeMobileMenu = document.querySelector('.close-mobile-menu');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarOverlay = document.querySelector('.sidebar-overlay');
+
+    if (mobileMenuButton) {
+        mobileMenuButton.addEventListener('click', () => {
+            sidebar.classList.add('mobile-open');
+            sidebarOverlay.classList.add('mobile-open');
+            document.body.classList.add('overflow-hidden');
+        });
+    }
+
+    if (closeMobileMenu) {
+        closeMobileMenu.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('mobile-open');
+            document.body.classList.remove('overflow-hidden');
+        });
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', () => {
+            sidebar.classList.remove('mobile-open');
+            sidebarOverlay.classList.remove('mobile-open');
+            document.body.classList.remove('overflow-hidden');
+        });
+    }
+
+    // Notificações
+    document.querySelector('[href="#notificacoes"]').addEventListener('click', function(e) {
         e.preventDefault();
         const dropdown = document.getElementById('notificacoes');
         dropdown.classList.toggle('hidden');
