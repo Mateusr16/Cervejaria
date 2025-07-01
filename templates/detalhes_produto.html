@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuração de Produtos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7', // cor letra 
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#92400E', // primeira cor degradê, dos icones e do botão salve
+                            700: '#15803d',
+                            800: '#F59E0B', // segunda cor degradê
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .input-highlight:focus {
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+        .disabled-input {
+            background-color: #f3f4f6;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto p-4 md:p-6">
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="bg-gradient-to-r from-primary-600 to-primary-800 p-6 text-white">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold flex items-center">
+                            <i class="fas fa-cog mr-3"></i> Configuração de Produtos
+                        </h1>
+                        <p class="mt-1 text-primary-100">Gerencie os preços, descontos e taxas de entrega</p>
+                    </div>
+                    <a href="{{ url_for('index') }}" class="flex items-center text-primary-100 hover:text-white transition-colors">
+                        <i class="fas fa-home mr-2"></i> Voltar
+                    </a>
+                </div>
+            </div>
+
+            <form action="/salvar_configuracao" method="post" class="p-6 space-y-8">
+                <!-- Produtos Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-beer text-primary-600 mr-3 text-xl"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Produtos</h2>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produto</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Custo (R$)</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Venda (R$)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">Pilsen</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">R$</span>
+                                            </div>
+                                            <input type="number" name="pilsen_custo" value="{{ pilsen_custo }}" step="0.01" required 
+                                                   class="input-highlight pl-8 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">R$</span>
+                                            </div>
+                                            <input type="number" name="pilsen_venda" value="{{ pilsen_venda }}" step="0.01" required 
+                                                   class="input-highlight pl-8 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">IPA</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">R$</span>
+                                            </div>
+                                            <input type="number" name="ipa_custo" value="{{ ipa_custo }}" step="0.01" required 
+                                                   class="input-highlight pl-8 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">R$</span>
+                                            </div>
+                                            <input type="number" name="ipa_venda" value="{{ ipa_venda }}" step="0.01" required 
+                                                   class="input-highlight pl-8 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">Stout</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">R$</span>
+                                            </div>
+                                            <input type="number" name="stout_custo" value="{{ stout_custo }}" step="0.01" required 
+                                                   class="input-highlight pl-8 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">R$</span>
+                                            </div>
+                                            <input type="number" name="stout_venda" value="{{ stout_venda }}" step="0.01" required 
+                                                   class="input-highlight pl-8 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Descontos Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-percentage text-primary-600 mr-3 text-xl"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Descontos</h2>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor da Venda</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desconto</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">Acima de R$ 4.000</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <input type="number" name="desconto_4000" value="{{ desconto_4000 }}" required 
+                                                   class="input-highlight pr-10 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">Acima de R$ 5.000</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <input type="number" name="desconto_5000" value="{{ desconto_5000 }}" required 
+                                                   class="input-highlight pr-10 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">Acima de R$ 6.000</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <input type="number" name="desconto_6000" value="{{ desconto_6000 }}" required 
+                                                   class="input-highlight pr-10 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Taxas de Entrega Section -->
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-truck text-primary-600 mr-3 text-xl"></i>
+                        <h2 class="text-xl font-semibold text-gray-800">Taxas de Entrega por Estado</h2>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado (UF)</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taxa de Entrega</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">RJ, SP</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <input type="number" name="entrega_rj_sp" value="{{ entrega_rj_sp }}" required 
+                                                   class="input-highlight pr-10 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                <tr>
+                                <tr>    
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">MG</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <input type="number" name="entrega_mg" value="{{ entrega_mg }}" required 
+                                                class="input-highlight pr-10 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">BA</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <input type="number" name="entrega_ba" value="{{ entrega_ba }}" required 
+                                                   class="input-highlight pr-10 block w-full rounded-md border-gray-300 focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">Outros</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="relative rounded-md shadow-sm">
+                                            <input type="number" name="entrega_outros" value="0" disabled 
+                                                   class="disabled-input pr-10 block w-full rounded-md border-gray-300 sm:text-sm">
+                                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                <span class="text-gray-500 sm:text-sm">%</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center pt-4">
+                    <button type="reset" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fas fa-undo mr-2"></i> Limpar
+                    </button>
+                    <button type="submit" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <i class="fas fa-save mr-2"></i> Salvar Configurações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Add input validation for percentages (0-100)
+        document.querySelectorAll('input[type="number"]').forEach(input => {
+            if (input.name.includes('desconto') || input.name.includes('entrega')) {
+                input.addEventListener('change', function() {
+                    if (this.value < 0) this.value = 0;
+                    if (this.value > 100) this.value = 100;
+                });
+            }
+        });
+
+        // Add currency formatting for product prices
+        document.querySelectorAll('input[name$="_custo"], input[name$="_venda"]').forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value && !isNaN(this.value)) {
+                    this.value = parseFloat(this.value).toFixed(2);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

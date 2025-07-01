@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes do Orçamento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .custom-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto animate-fade-in">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Detalhes do Orçamento</h1>
+            <div class="w-20 h-1 bg-blue-500 mx-auto rounded-full"></div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="mb-6 space-y-3">
+            {% for category, message in messages %}
+            <div class="flash {{ category }} p-4 rounded-lg border flex items-start">
+                {% if category == 'success' %}
+                <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                {% elif category == 'error' %}
+                <i class="fas fa-exclamation-circle text-red-500 mt-1 mr-3"></i>
+                {% elif category == 'warning' %}
+                <i class="fas fa-exclamation-triangle text-yellow-500 mt-1 mr-3"></i>
+                {% endif %}
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Main Container -->
+        <div class="bg-white rounded-xl custom-shadow overflow-hidden">
+            <!-- Client Info Section -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center mb-4">
+                    <div class="bg-blue-100 p-3 rounded-full mr-4">
+                        <i class="fas fa-user text-blue-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-800">{{ nome }}</h2>
+                        <p class="text-gray-600">{{ cidade|capitalize }} - {{ estado|upper }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center">
+                    <div class="bg-purple-100 p-3 rounded-full mr-4">
+                        <i class="fas fa-user-tie text-purple-500 text-xl"></i>
+                    </div>
+                    <div>
+                        <p class="text-gray-700"><span class="font-medium">Vendedor:</span> {{ vendedor }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products Section -->
+            <div class="p-6 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                    <i class="fas fa-beer text-yellow-500 mr-2"></i>
+                    Itens do Orçamento
+                </h3>
+                
+                <div class="space-y-3">
+                    {% for tipo, qtd in quantidades.items() %}
+                    {% if qtd|int > 0 %}
+                    <div class="flex justify-between items-center py-2">
+                        <span class="text-gray-700">{{ tipo|capitalize }} ({{ qtd }} x R$ {{ valores_cervejas[tipo]['venda'] }})</span>
+                        <span class="font-medium text-gray-800">R$ {{ (qtd|int * valores_cervejas[tipo]['venda']|float)|round(2, 'common') | string | replace(',', '.') }}</span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="p-6">
+                <div class="mb-4">
+                    <div class="flex justify-between py-2">
+                        <span class="text-gray-700">Subtotal</span>
+                        <span class="font-medium text-gray-800">R$ {{ subtotal }}</span>
+                    </div>
+                    
+                    {% if desconto_pct.strip('%')|float > 0 %}
+                    <div class="flex justify-between py-2 text-green-600">
+                        <span>Desconto ({{ desconto_pct }})</span>
+                        <span>- R$ {{ desconto_val }}</span>
+                    </div>
+                    {% endif %}
+                    
+                    {% if entrega_pct.strip('%')|float > 0 %}
+                    <div class="flex justify-between py-2 text-blue-600">
+                        <span>Entrega ({{ estado|upper }} {{ entrega_pct }})</span>
+                        <span>+ R$ {{ entrega_val }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <span class="text-lg font-semibold text-gray-800">Total</span>
+                        <span class="text-2xl font-bold text-blue-600">R$ {{ valor_final }}</span>
+                    </div>
+                </div>
+                
+                <!-- Form -->
+                <form method="post" action="{{ url_for('confirmar_venda') }}" class="mt-6">
+                    <input type="hidden" name="nome" value="{{ nome }}">
+                    <input type="hidden" name="cidade" value="{{ cidade }}">
+                    <input type="hidden" name="estado" value="{{ estado }}">
+                    <input type="hidden" name="vendedor" value="{{ vendedor }}">
+                    {% for tipo, qtd in quantidades.items() %}
+                    <input type="hidden" name="{{ tipo }}_qty" value="{{ qtd }}">
+                    {% endfor %}
+                    <input type="hidden" name="valor_final" value="{{ valor_final }}">
+                    <input type="hidden" name="subtotal" value="{{ subtotal }}">
+                    <input type="hidden" name="desconto_pct" value="{{ desconto_pct }}">
+                    <input type="hidden" name="desconto_val" value="{{ desconto_val }}">
+                    <input type="hidden" name="entrega_pct" value="{{ entrega_pct }}">
+                    <input type="hidden" name="entrega_val" value="{{ entrega_val }}">
+                    
+                    <div class="flex flex-col sm:flex-row sm:space-x-4 space-y-3 sm:space-y-0">
+                        <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            Confirmar Venda
+                        </button>
+                        
+                        <a href="{{ url_for('index') }}" class="flex-1 border border-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg transition duration-200 hover:bg-gray-50 flex items-center justify-center">
+                            <i class="fas fa-arrow-left mr-2"></i>
+                            Novo Orçamento
+                        </a>
+                    </div>
+                </form>
+            </div>
+    </div>
+</body>
+</html>

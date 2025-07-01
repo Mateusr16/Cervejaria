@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maltheus Brew OS - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #e67e22;
+            overflow: hidden;
+        }
+        
+        .beer-bubble {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-100px) rotate(180deg);
+            }
+            100% {
+                transform: translateY(-200px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .glass-effect {
+            backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 16px;
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            background: rgba(0, 0, 0, 0.2);
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.5);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f59e0b, #b45309);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4);
+        }
+        
+        .logo-beer {
+            animation: tilt 5s infinite ease-in-out;
+        }
+        
+        @keyframes tilt {
+            0%, 100% {
+                transform: rotate(-5deg);
+            }
+            50% {
+                transform: rotate(5deg);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <!-- Beer bubbles background -->
+    <div id="bubbles-container"></div>
+    
+    <!-- Main login container -->
+    <div class="glass-effect rounded-2xl p-8 w-full max-w-md mx-4 relative overflow-hidden">
+        <!-- Beer foam top decoration -->
+        <div class="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-amber-100 to-transparent opacity-30 rounded-t-2xl"></div>
+        
+        <div class="flex flex-col items-center mb-8">
+            <!-- Logo -->
+            <div class="logo-beer mb-4">
+                <div class="relative">
+                    <div class="w-16 h-24 bg-amber-700 rounded-b-lg"></div>
+                    <div class="absolute -top-2 left-0 right-0 h-4 bg-amber-100 rounded-full"></div>
+                    <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                        <i class="fas fa-beer text-4xl text-amber-400"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <h1 class="text-3xl font-bold text-amber-400 mb-1">MALTHEUS BREW</h1>
+            <p class="text-amber-100 opacity-80 text-sm">Sistema de Gestão de Cervejaria</p>
+        </div>
+        
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label for="username" class="block text-sm font-medium text-amber-100 mb-1">Username</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-user text-amber-300"></i>
+                    </div>
+                    <input type="text" id="username" name="username" required 
+                           class="input-field pl-10 w-full px-4 py-3 rounded-lg text-white placeholder-amber-200 focus:outline-none"
+                           placeholder="Enter your username">
+                </div>
+            </div>
+            
+            <div>
+                <label for="password" class="block text-sm font-medium text-amber-100 mb-1">Password</label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <i class="fas fa-lock text-amber-300"></i>
+                    </div>
+                    <input type="password" id="password" name="password" required 
+                           class="input-field pl-10 w-full px-4 py-3 rounded-lg text-white placeholder-amber-200 focus:outline-none"
+                           placeholder="••••••••">
+                    <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <i class="fas fa-eye text-amber-300 hover:text-amber-400 cursor-pointer"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input id="remember-me" name="remember-me" type="checkbox" 
+                           class="h-4 w-4 text-amber-500 focus:ring-amber-400 border-gray-300 rounded">
+                    <label for="remember-me" class="ml-2 block text-sm text-amber-100">
+                        Remember me
+                    </label>
+                </div>
+                
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-amber-400 hover:text-amber-300">
+                        Forgot password?
+                    </a>
+                </div>
+            </div>
+            
+            <div>
+                <button type="submit" class="btn-primary w-full py-3 px-4 rounded-lg text-white font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500">
+                    Iniciar <i class="fas fa-sign-in-alt ml-2"></i>
+                </button>
+            </div>
+        </form>
+        
+
+    
+    <!-- Footer -->
+    <div class="absolute bottom-4 left-0 right-0 text-center text-xs text-amber-100 opacity-60">
+        <p>© 2024 Maltheus Brew Company. All rights reserved. v4.2.0</p>
+    </div>
+    
+    <script>
+        // Create beer bubbles
+        function createBubbles() {
+            const container = document.getElementById('bubbles-container');
+            const bubbleCount = 20;
+            
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('beer-bubble');
+                
+                // Random size between 5px and 20px
+                const size = Math.random() * 15 + 5;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                
+                // Random position
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.bottom = `-${size}px`;
+                
+                // Random animation duration and delay
+                const duration = Math.random() * 10 + 10;
+                const delay = Math.random() * 15;
+                bubble.style.animationDuration = `${duration}s`;
+                bubble.style.animationDelay = `${delay}s`;
+                
+                container.appendChild(bubble);
+            }
+        }
+        
+        // Toggle password visibility
+        document.getElementById('togglePassword').addEventListener('click', function() {
+            const passwordInput = document.getElementById('password');
+            const icon = this.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+        
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation
+            if (!username || !password) {
+                alert('Please enter both username and password');
+                return;
+            }
+            
+            // Here you would typically make an API call to authenticate
+            console.log('Login attempt with:', { username, password });
+            
+            // Simulate loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Authenticating...';
+            
+            // Simulate API call
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // For demo purposes, show success message
+                alert('Login successful! Welcome to Maltheus Brew OS.');
+                
+                // In a real app, you would redirect to the dashboard
+                // window.location.href = '/dashboard';
+            }, 1500);
+        });
+        
+        // Initialize bubbles when page loads
+        window.addEventListener('load', createBubbles);
+    </script>
+</body>
+</html>

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle Financeiro - Cervejaria</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+          /* Dashboard Card Styles */
+        .dashboard-card {
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background: #fff8f0;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .input-field:focus {
+            border-color: #c47f00;
+            box-shadow: 0 0 0 3px rgba(196, 127, 0, 0.2);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .beer-bottle {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        body { background: #fff7eb; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-10 text-center fade-in">
+            <div class="flex items-center justify-center gap-4">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="h-24 opacity-90 object-contain beer-bottle">
+                <div>
+                    <h1 class="text-3xl md:text-4xl font-serif font-bold text-yellow-900 mb-2">
+                        Controle Financeiro - Maltheus Brew
+                    </h1>
+                    <p class="text-yellow-800 max-w-2xl mx-auto">
+                        Gerencie suas finanças com o espírito da cervejaria
+                    </p>
+                </div>
+            </div>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Sales -->
+            <div class="dashboard-card bg-white rounded-lg p-6 fade-in" style="animation-delay: 0.1s">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Vendas Totais</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1" id="total-sales">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-chart-line text-green-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>Meta mensal</span>
+                        <span class="font-medium">R$ 53.500,00</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mt-1">
+                        <div class="bg-green-500 h-2 rounded-full" id="sales-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Raw Material Costs -->
+            <div class="dashboard-card bg-white rounded-lg p-6 fade-in" style="animation-delay: 0.2s">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Matéria Prima</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1" id="raw-material-cost">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-boxes text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>Por litro</span>
+                        <span class="font-medium" id="cost-per-liter">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transportation Costs -->
+            <div class="dashboard-card bg-white rounded-lg p-6 fade-in" style="animation-delay: 0.3s">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Transporte</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1" id="transport-cost">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <i class="fas fa-truck text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>Por entrega</span>
+                        <span class="font-medium" id="cost-per-delivery">R$ 0,00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fixed Costs -->
+            <div class="dashboard-card bg-white rounded-lg p-6 fade-in" style="animation-delay: 0.4s">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="text-gray-500 text-sm font-medium">Custos Fixos</p>
+                        <h3 class="text-2xl font-bold text-gray-800 mt-1" id="fixed-costs">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-home text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between text-sm text-gray-600">
+                        <span>Por mês</span>
+                        <span class="font-medium">Fixos</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profit Summary -->
+        <div class="dashboard-card bg-white rounded-lg p-6 mb-8 fade-in" style="animation-delay: 0.5s">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800 mb-1">Resumo Financeiro</h2>
+                    <p class="text-gray-600">Lucro líquido e margem de contribuição</p>
+                </div>
+                    <div class="mt-4 md:mt-0">
+                        <div class="flex items-center">
+                            <span class="text-gray-500 mr-2">Período:</span>
+                            <select id="periodo-select" 
+                                    class="bg-gray-100 border border-gray-300 text-gray-700 py-1 px-3 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                {% for periodo in periodos_disponiveis %}
+                                    <option value="{{ periodo.mes }},{{ periodo.ano }}"
+                                            {% if periodo.mes == periodo_selecionado.split(',')[0]|int and periodo.ano == periodo_selecionado.split(',')[1]|int %}selected{% endif %}>
+                                        {{ periodo.label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <!-- Gross Profit -->
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-blue-800 text-sm font-medium">Lucro Bruto</p>
+                            <h3 class="text-2xl font-bold text-blue-900 mt-1" id="gross-profit">R$ 0,00</h3>
+                        </div>
+                        <i class="fas fa-coins text-blue-600 text-2xl"></i>
+                    </div>
+                    <div class="mt-3 text-sm text-blue-700">
+                        <span id="gross-margin">0%</span> de margem bruta
+                    </div>
+                </div>
+                
+                <!-- Net Profit -->
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-green-800 text-sm font-medium">Lucro Líquido</p>
+                            <h3 class="text-2xl font-bold text-green-900 mt-1" id="net-profit">R$ 0,00</h3>
+                        </div>
+                        <i class="fas fa-piggy-bank text-green-600 text-2xl"></i>
+                    </div>
+                    <div class="mt-3 text-sm text-green-700">
+                        <span id="net-margin">0%</span> de margem líquida
+                    </div>
+                </div>
+                
+                <!-- Expenses -->
+                <div class="bg-red-50 p-4 rounded-lg">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-red-800 text-sm font-medium">Total Despesas</p>
+                            <h3 class="text-2xl font-bold text-red-900 mt-1" id="total-expenses">R$ 0,00</h3>
+                        </div>
+                        <i class="fas fa-receipt text-red-600 text-2xl"></i>
+                    </div>
+                    <div class="mt-3 text-sm text-red-700">
+                        <span id="expense-percentage">0%</span> das vendas
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Data Entry -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Financial Chart -->
+            <div class="dashboard-card bg-white rounded-lg p-6 fade-in" style="animation-delay: 0.6s">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Desempenho Financeiro</h2>
+                <div class="h-64">
+                    <canvas id="financialChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- Data Entry Form -->
+            <div class="dashboard-card bg-white rounded-lg p-6 fade-in" style="animation-delay: 0.7s">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Registrar Dados</h2>
+                <form id="finance-form">
+                    <div class="space-y-4">
+                        <!-- Sales -->
+                        <div>
+                            <label for="sales" class="block text-sm font-medium text-gray-700 mb-1">Vendas (R$)</label>
+                            <input type="number" step="0.01" id="sales" 
+                                class="input-field w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ '%.2f'|format(total_vendas) }}" readonly>
+                            <p class="text-xs text-gray-500 mt-1">Valor automático das vendas do mês</p>
+                        </div>
+                        
+                        <!-- Quantity Produced -->
+                        <!-- Quantity Produced -->
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">Quantidade Produzida (litros)</label>
+                            <input type="number" id="quantity" 
+                                class="input-field w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ litros_produzidos | default(0) }}" 
+                                readonly>  <!-- Adicionar readonly e valor padrão -->
+                        </div>
+                        <!-- Raw Material Cost -->
+                        <div>
+                            <label for="raw-material" class="block text-sm font-medium text-gray-700 mb-1">Custo Matéria Prima (R$)</label>
+                            <input type="number" step="0.01" id="raw-material" 
+                                class="input-field w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                value="{{ '%.2f'|format(custo_materia_prima|float) }}">
+                        </div>
+                        
+                            <!-- Custo Transporte -->
+                            <div>
+                                <label for="transport" class="block text-sm font-medium text-gray-700 mb-1">Custo Transporte (R$)</label>
+                                <input type="number" step="0.01" id="transport" 
+                                    class="input-field w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value="{{ total_transporte | default(0) | round(2) }}" readonly>
+                            </div>
+
+                            <!-- Número de Entregas -->
+                            <div>
+                                <label for="deliveries" class="block text-sm font-medium text-gray-700 mb-1">Número de Entregas</label>
+                                <input type="number" id="deliveries" 
+                                    class="input-field w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    value="{{ numero_entregas | default(0) }}" readonly>
+                            </div>
+                        
+                        <!-- Fixed Costs -->
+                        <div>
+                            <label for="fixed-cost" class="block text-sm font-medium text-gray-700 mb-1">Custos Fixos (R$)</label>
+                            <input type="number" step="0.01" id="fixed-cost" class="input-field w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div class="pt-2">
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-300">
+                                <i class="fas fa-save mr-2"></i> Salvar Dados
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Cost Breakdown -->
+        <div class="dashboard-card bg-white rounded-lg p-6 mb-8 fade-in" style="animation-delay: 0.8s">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Distribuição de Custos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="h-64">
+                    <canvas id="costDistributionChart"></canvas>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-800 mb-3">Detalhes dos Custos</h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-700">Matéria Prima</span>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800" id="raw-material-percent">0%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-700">Transporte</span>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800" id="transport-percent">0%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-purple-500 rounded-full mr-2"></div>
+                                <span class="text-sm text-gray-700">Custos Fixos</span>
+                            </div>
+                            <span class="text-sm font-medium text-gray-800" id="fixed-percent">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="font-medium text-gray-800 mb-2">Custo por Litro</h4>
+                        <div class="bg-gray-100 p-3 rounded-lg">
+                            <div class="flex justify-between text-sm text-gray-700 mb-1">
+                                <span>Matéria Prima:</span>
+                                <span class="font-medium" id="raw-per-liter">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-700 mb-1">
+                                <span>Transporte:</span>
+                                <span class="font-medium" id="transport-per-liter">R$ 0,00</span>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-700">
+                                <span>Custos Fixos:</span>
+                                <span class="font-medium" id="fixed-per-liter">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Format currency
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        // Calculate and update all financial metrics
+        function updateFinancialData() {
+            // Get input values
+            const sales = parseFloat(document.getElementById('sales').value) || 0;
+            const quantity = parseFloat(document.getElementById('quantity').value) || 1;
+            const rawMaterial = parseFloat(document.getElementById('raw-material').value) || 0;
+            const transport = parseFloat(document.getElementById('transport').value) || 0;
+            const deliveries = parseFloat(document.getElementById('deliveries').value) || 1;
+            const fixedCost = parseFloat(document.getElementById('fixed-cost').value) || 0;
+            
+            // Calculate derived values
+            const totalExpenses = rawMaterial + transport + fixedCost;
+            const grossProfit = sales - rawMaterial - transport;
+            const netProfit = sales - totalExpenses;
+            
+            const grossMargin = sales > 0 ? (grossProfit / sales) * 100 : 0;
+            const netMargin = sales > 0 ? (netProfit / sales) * 100 : 0;
+            const expensePercentage = sales > 0 ? (totalExpenses / sales) * 100 : 0;
+            
+            const costPerLiter = quantity > 0 ? totalExpenses / quantity : 0;
+            const rawPerLiter = quantity > 0 ? rawMaterial / quantity : 0;
+            const transportPerLiter = quantity > 0 ? transport / quantity : 0;
+            const fixedPerLiter = quantity > 0 ? fixedCost / quantity : 0;
+            
+            const costPerDelivery = deliveries > 0 ? transport / deliveries : 0;
+            
+            // Calculate cost distribution percentages
+            const totalCost = rawMaterial + transport + fixedCost;
+            const rawPercent = totalCost > 0 ? (rawMaterial / totalCost) * 100 : 0;
+            const transportPercent = totalCost > 0 ? (transport / totalCost) * 100 : 0;
+            const fixedPercent = totalCost > 0 ? (fixedCost / totalCost) * 100 : 0;
+            
+            // Update display values
+            document.getElementById('total-sales').textContent = formatCurrency(sales);
+            document.getElementById('raw-material-cost').textContent = formatCurrency(rawMaterial);
+            document.getElementById('transport-cost').textContent = formatCurrency(transport);
+            document.getElementById('fixed-costs').textContent = formatCurrency(fixedCost);
+            
+            document.getElementById('gross-profit').textContent = formatCurrency(grossProfit);
+            document.getElementById('net-profit').textContent = formatCurrency(netProfit);
+            document.getElementById('total-expenses').textContent = formatCurrency(totalExpenses);
+            
+            document.getElementById('gross-margin').textContent = grossMargin.toFixed(1) + '%';
+            document.getElementById('net-margin').textContent = netMargin.toFixed(1) + '%';
+            document.getElementById('expense-percentage').textContent = expensePercentage.toFixed(1) + '%';
+            
+            document.getElementById('cost-per-liter').textContent = formatCurrency(costPerLiter);
+            document.getElementById('raw-per-liter').textContent = formatCurrency(rawPerLiter);
+            document.getElementById('transport-per-liter').textContent = formatCurrency(transportPerLiter);
+            document.getElementById('fixed-per-liter').textContent = formatCurrency(fixedPerLiter);
+            
+            document.getElementById('cost-per-delivery').textContent = formatCurrency(costPerDelivery);
+            
+            document.getElementById('raw-material-percent').textContent = rawPercent.toFixed(1) + '%';
+            document.getElementById('transport-percent').textContent = transportPercent.toFixed(1) + '%';
+            document.getElementById('fixed-percent').textContent = fixedPercent.toFixed(1) + '%';
+            
+            // Update sales progress
+            const salesProgress = Math.min((sales / 53500) * 100, 100);
+            document.getElementById('sales-progress').style.width = salesProgress + '%';
+            
+            // Update charts
+            updateCharts(sales, rawMaterial, transport, fixedCost, grossProfit, netProfit);
+        }
+        
+        // Initialize charts
+        let financialChart, costDistributionChart;
+        
+        function initializeCharts() {
+            // Financial Performance Chart
+            const financialCtx = document.getElementById('financialChart').getContext('2d');
+            financialChart = new Chart(financialCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Vendas', 'Matéria Prima', 'Transporte', 'Custos Fixos', 'Lucro Bruto', 'Lucro Líquido'],
+                    datasets: [{
+                        label: 'Valores (R$)',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(34, 197, 94, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(34, 197, 94, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'R$ ' + context.raw.toLocaleString('pt-BR');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Cost Distribution Chart
+            const costCtx = document.getElementById('costDistributionChart').getContext('2d');
+            costDistributionChart = new Chart(costCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Matéria Prima', 'Transporte', 'Custos Fixos'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(234, 179, 8, 0.7)',
+                            'rgba(168, 85, 247, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(234, 179, 8, 1)',
+                            'rgba(168, 85, 247, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return `${label}: ${formatCurrency(value)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update charts with new data
+        function updateCharts(sales, rawMaterial, transport, fixedCost, grossProfit, netProfit) {
+            // Update financial chart
+            financialChart.data.datasets[0].data = [
+                sales, 
+                rawMaterial, 
+                transport, 
+                fixedCost, 
+                grossProfit, 
+                netProfit
+            ];
+            financialChart.update();
+            
+            // Update cost distribution chart
+            costDistributionChart.data.datasets[0].data = [
+                rawMaterial, 
+                transport, 
+                fixedCost
+            ];
+            costDistributionChart.update();
+        }
+        
+        // Form submission
+        document.getElementById('finance-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            updateFinancialData();
+        });
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            
+            // Set default values for demonstration
+            document.getElementById('fixed-cost').value = '15000';
+            
+            updateFinancialData();
+        });
+
+    // Atualizar dados quando o período for alterado
+    async function carregarDadosPeriodo(mes, ano) {
+        try {
+            const response = await fetch(`/financeiro/dados?mes=${mes}&ano=${ano}`);
+            const data = await response.json();
+            
+            if (response.ok) {
+                // Atualizar campos do formulário
+                document.getElementById('sales').value = data.total_vendas;
+                document.getElementById('quantity').value = data.litros_produzidos;
+                document.getElementById('raw-material').value = data.custo_materia_prima;
+                document.getElementById('transport').value = data.custo_transporte;
+                document.getElementById('deliveries').value = data.numero_entregas;
+                document.getElementById('fixed-cost').value = data.custos_fixos;
+                
+                // Atualizar resumo financeiro
+                document.getElementById('total-sales').textContent = formatCurrency(data.total_vendas);
+                document.getElementById('raw-material-cost').textContent = formatCurrency(data.custo_materia_prima);
+                document.getElementById('transport-cost').textContent = formatCurrency(data.custo_transporte);
+                document.getElementById('fixed-costs').textContent = formatCurrency(data.custos_fixos);
+                
+                document.getElementById('gross-profit').textContent = formatCurrency(data.lucro_bruto);
+                document.getElementById('net-profit').textContent = formatCurrency(data.lucro_liquido);
+                document.getElementById('total-expenses').textContent = formatCurrency(
+                    data.custo_materia_prima + data.custo_transporte + data.custos_fixos
+                );
+                
+                document.getElementById('gross-margin').textContent = 
+                    ((data.lucro_bruto / data.total_vendas) * 100 || 0).toFixed(1) + '%';
+                document.getElementById('net-margin').textContent = 
+                    ((data.lucro_liquido / data.total_vendas) * 100 || 0).toFixed(1) + '%';
+                
+                // Atualizar gráficos
+                updateCharts(
+                    data.total_vendas, 
+                    data.custo_materia_prima, 
+                    data.custo_transporte, 
+                    data.custos_fixos, 
+                    data.lucro_bruto, 
+                    data.lucro_liquido
+                );
+                
+                // Atualizar métricas adicionais
+                const quantity = data.litros_produzidos || 1;
+                document.getElementById('cost-per-liter').textContent = 
+                    formatCurrency((data.custo_materia_prima + data.custo_transporte + data.custos_fixos) / quantity);
+                
+                const deliveries = data.numero_entregas || 1;
+                document.getElementById('cost-per-delivery').textContent = 
+                    formatCurrency(data.custo_transporte / deliveries);
+            } else {
+                console.error('Erro ao buscar dados:', data.error);
+            }
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+        }
+    }
+
+    // Atualizar dados quando o período for alterado
+    document.getElementById('periodo-select').addEventListener('change', function() {
+        const [mes, ano] = this.value.split(',').map(Number);
+        carregarDadosPeriodo(mes, ano);
+    });
+
+    // Carregar dados iniciais
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeCharts();
+        
+        // Obter período selecionado inicial
+        const periodoInicial = document.getElementById('periodo-select').value;
+        const [mesInicial, anoInicial] = periodoInicial.split(',').map(Number);
+        
+        // Carregar dados do período inicial
+        carregarDadosPeriodo(mesInicial, anoInicial);
+    });
+    </script>
+</body>
+</html>

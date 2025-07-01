@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Histórico de Movimentações de Estoque</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .custom-shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .animate-pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-boxes text-blue-500 mr-2"></i>
+                Histórico de Movimentações de Estoque
+            </h1>
+            <p class="text-gray-600">Gerencie e visualize todas as movimentações do seu estoque</p>
+        </header>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Form Section -->
+            <div class="bg-white rounded-xl custom-shadow-lg p-6">
+                <div class="flex items-center mb-6">
+                    <div class="bg-blue-100 p-3 rounded-full mr-4">
+                        <i class="fas fa-plus-circle text-blue-500 text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Adicionar Movimentação</h2>
+                </div>
+                
+                <form action="{{ url_for('adicionar_movimentacao') }}" method="post" class="space-y-4">
+                    <div>
+                        <label for="produto" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-beer mr-1 text-gray-500"></i> Produto
+                        </label>
+                        <select id="produto" name="produto" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <option value="" disabled selected>Selecione um produto</option>
+                            <option value="pilsen">Pilsen</option>
+                            <option value="ipa">IPA</option>
+                            <option value="stout">Stout</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="quantidade" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-sort-numeric-up mr-1 text-gray-500"></i> Quantidade
+                        </label>
+                        <input type="number" id="quantidade" name="quantidade" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                            placeholder="Ex: 50">
+                    </div>
+                    
+                    <div>
+                        <label for="tipo_movimentacao" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-exchange-alt mr-1 text-gray-500"></i> Tipo de Movimentação
+                        </label>
+                        <div class="grid grid-cols-3 gap-4"> <!-- Alterado para 3 colunas -->
+                            <div class="flex items-center">
+                                <input type="radio" id="entrada" name="tipo_movimentacao" value="entrada" required
+                                    class="h-4 w-4 text-green-500 focus:ring-green-500 border-gray-300">
+                                <label for="entrada" class="ml-2 block text-sm text-gray-700">
+                                    <span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Entrada</span>
+                                </label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="radio" id="saida" name="tipo_movimentacao" value="saida"
+                                    class="h-4 w-4 text-red-500 focus:ring-red-500 border-gray-300">
+                                <label for="saida" class="ml-2 block text-sm text-gray-700">
+                                    <span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Saída</span>
+                                </label>
+                            </div>
+                            <div class="flex items-center"> <!-- Nova opção de Perda -->
+                                <input type="radio" id="perca" name="tipo_movimentacao" value="perca"
+                                    class="h-4 w-4 text-purple-500 focus:ring-purple-500 border-gray-300">
+                                <label for="perca" class="ml-2 block text-sm text-gray-700">
+                                    <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full text-xs">Perda</span>
+                                </label>
+                            </div>
+                        </div>
+                    
+                    <div>
+                        <label for="motivo" class="block text-sm font-medium text-gray-700 mb-1">
+                            <i class="fas fa-comment-dots mr-1 text-gray-500"></i> Motivo
+                        </label>
+                        <textarea id="motivo" name="motivo" rows="3" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                            placeholder="Descreva o motivo da movimentação"></textarea>
+                    </div>
+                    
+                    <button type="submit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-save mr-2"></i> Adicionar Movimentação
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Chart Section -->
+            <div class="bg-white rounded-xl custom-shadow-lg p-6">
+                <div class="flex items-center mb-6">
+                    <div class="bg-purple-100 p-3 rounded-full mr-4">
+                        <i class="fas fa-chart-bar text-purple-500 text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Visão Geral do Estoque</h2>
+                </div>
+                
+                <div class="relative h-64">
+                    <canvas id="estoqueChart"></canvas>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-3 gap-4 text-center">
+                    <div class="bg-yellow-50 p-3 rounded-lg">
+                        <p class="text-sm text-yellow-700 font-medium">Pilsen</p>
+                        <p class="text-xl font-bold text-yellow-600">{{ estoque_pilsen }}</p>
+                    </div>
+                    <div class="bg-orange-50 p-3 rounded-lg">
+                        <p class="text-sm text-orange-700 font-medium">IPA</p>
+                        <p class="text-xl font-bold text-orange-600">{{ estoque_ipa }}</p>
+                    </div>
+                    <div class="bg-red-50 p-3 rounded-lg">
+                        <p class="text-sm text-red-700 font-medium">Stout</p>
+                        <p class="text-xl font-bold text-red-600">{{ estoque_stout }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Table -->
+        <div class="bg-white rounded-xl custom-shadow-lg overflow-hidden mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <div class="flex items-center">
+                    <div class="bg-green-100 p-3 rounded-full mr-4">
+                        <i class="fas fa-history text-green-500 text-xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-gray-800">Histórico Completo</h2>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-clock mr-1"></i> Data
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-beer mr-1"></i> Produto
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-sort-amount-up mr-1"></i> Quantidade
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-exchange-alt mr-1"></i> Tipo
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <i class="fas fa-comment mr-1"></i> Motivo
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for item in historico.items %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ item.data.strftime('%d/%m/%y %H:%M') }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    {% if item.produto == 'pilsen' %}
+                                    <div class="flex-shrink-0 h-5 w-5 bg-yellow-200 rounded-full"></div>
+                                    {% elif item.produto == 'ipa' %}
+                                    <div class="flex-shrink-0 h-5 w-5 bg-orange-200 rounded-full"></div>
+                                    {% else %}
+                                    <div class="flex-shrink-0 h-5 w-5 bg-red-200 rounded-full"></div>
+                                    {% endif %}
+                                    <div class="ml-2">
+                                        <div class="text-sm font-medium text-gray-900 capitalize">{{ item.produto }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ item.quantidade }}
+                            </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if item.tipo_movimentacao == 'entrada' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                        <i class="fas fa-arrow-down mr-1"></i> Entrada
+                                    </span>
+                                    {% elif item.tipo_movimentacao == 'perca' %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-purple-100 text-purple-800">
+                                        <i class="fas fa-times-circle mr-1"></i> Perda
+                                    </span>
+                                    {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        <i class="fas fa-arrow-up mr-1"></i> Saída
+                                    </span>
+                                    {% endif %}
+                                </td>
+                            <td class="px-6 py-4 text-sm text-gray-500">
+                                {{ item.motivo }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <!-- Paginação -->
+                <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4">
+                    <div class="text-sm text-gray-600">
+                        Mostrando página {{ historico.page }} de {{ historico.pages }} (Total: {{ historico.total }} registros)
+                    </div>
+                    <div class="flex items-center gap-2">
+                        {% if historico.has_prev %}
+                            <a href="{{ url_for('estoque', page=historico.prev_num) }}"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center">
+                                <i class="fas fa-chevron-left mr-2"></i> Anterior
+                            </a>
+                        {% endif %}
+                        
+                        {% if historico.has_next %}
+                            <a href="{{ url_for('estoque', page=historico.next_num) }}"
+                                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center">
+                                Próxima <i class="fas fa-chevron-right ml-2"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center">
+            <a href="{{ url_for('index') }}"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                <i class="fas fa-home mr-2"></i> Voltar ao Início
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Chart initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('estoqueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Pilsen', 'IPA', 'Stout'],
+                    datasets: [{
+                        label: 'Quantidade em Estoque',
+                        data: [{{ estoque_pilsen }}, {{ estoque_ipa }}, {{ estoque_stout }}],
+                        backgroundColor: [
+                            'rgba(255, 252, 193, 0.8)',
+                            'rgba(249, 155, 23, 0.8)',
+                            'rgba(125, 48, 22, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 252, 193, 1)',
+                            'rgba(249, 155, 23, 1)',
+                            'rgba(125, 48, 22, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            },
+                            ticks: {
+                                stepSize: 10
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

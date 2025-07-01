@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Vendas Confirmados{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Lista de Vendas Confirmados</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if vendas %}  
+		<style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+                font-weight: bold;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+        </style>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número do Pedido</th>  <th>Data</th>
+                        <th>Cliente</th>
+                        <th>Valor Bruto</th>
+                        <th>Desconto</th>
+                        <th>Entrega</th>
+                        <th>Valor Final</th>
+                        <th>Vendedor</th>
+                        <th>Cidade - Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venda in vendas %}  
+                        <tr>
+                            <td>{{ venda.numero_pedido }}</td>  <td>{{ venda.data }}</td>  
+                            <td>{{ venda.cliente }}</td> 
+                            <td>{{ venda.subtotal }}</td> 
+                            <td>{{ venda.desconto_pct }} ({{ venda.desconto_val }})</td>
+                            <td>{{ venda.entrega_pct }} ({{ venda.entrega_val }})</td>
+                            <td>{{ venda.valor_total }}</td> 
+                            <td>{{ venda.vendedor }}</td>
+                            <td>{{ venda.cidade_estado }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+    {% else %}
+        <p>Nenhuma venda confirmada ainda.</p>  {% endif %}
+
+    <p><a href="{{ url_for('index') }}">Voltar para o Orçamento</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Pedidos Confirmados{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Lista de Pedidos Confirmados</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if pedidos %}
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+                font-weight: bold;
+            }
+            tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            ul {
+                margin: 0;
+                padding-left: 20px;
+            }
+        </style>
+        <table>
+            <thead>
+                <tr>
+                    <th>Número do Pedido</th>  <th>Data</th>
+                    <th>Cliente</th>
+                    <th>Itens</th>
+                    <th>Custo Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                    <tr>
+                        <td>{{ pedido.numero_pedido }}</td>  <td>{{ pedido.data }}</td>
+                        <td>{{ pedido.cliente }}</td>
+                        <td>
+                            <ul>
+                                {% for item in pedido.itens %}
+                                    <li>
+                                        {{ item.tipo }}: {{ item.quantidade }} x R$ {{ item.custo_unitario|float|round(2, 'common') }} = R$ {{ (item.quantidade * item.custo_unitario|float)|round(2, 'common') }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <td>
+                            {% set ns = namespace(total_custo=0) %}
+                            {% for item in pedido.itens %}
+                                {% set ns.total_custo = ns.total_custo + (item.quantidade * item.custo_unitario|float) %}
+                            {% endfor %}
+                            <strong>R$ {{ ns.total_custo|round(2, 'common') }}</strong>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Nenhum pedido confirmado ainda.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('index') }}">Voltar para o Orçamento</a></p>
+</div>
+{% endblock %}

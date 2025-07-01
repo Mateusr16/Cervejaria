@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maltheus Brew - Sistema de Gestão</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        maltheus: {
+                            primary: '#F59E0B',
+                            dark: '#92400E',
+                            light: '#FEF3C7',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+        .sidebar.collapsed {
+            width: 80px;
+        }
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+        .main-content {
+            transition: margin-left 0.3s ease;
+        }
+        .beer-bottle {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-maltheus-dark text-white w-64 flex flex-col">
+            <div class="p-4 flex items-center justify-between border-b border-maltheus-primary">
+                <div class="flex items-center space-x-2">
+                    <img src="{{ url_for('static', filename='logo.png') }}" 
+                            alt="Logo" 
+                            class="w-20 h-20 object-contain">
+                    <span class="text-xl font-bold">Maltheus Brew</span>
+                </div>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto py-4">
+                <nav>
+                    <div class="px-4 py-2 text-gray-300 uppercase text-xs font-semibold">Menu Principal</div>
+                    <a href="/financeiro" class="flex items-center px-4 py-3 text-white bg-maltheus-primary">
+                        <i class="fas fa-home mr-3"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="/producao" class="flex items-center px-4 py-3 text-gray-300 hover:bg-maltheus-primary hover:text-white">
+                        <i class="fas fa-beer mr-3"></i>
+                        <span class="nav-text">Produção</span>
+                    </a>
+                    <a href="{{ url_for('estoque') }}" class="flex items-center px-4 py-3 text-gray-300 hover:bg-maltheus-primary hover:text-white">
+                        <i class="fas fa-warehouse mr-3"></i>
+                        <span class="nav-text">Estoque</span>
+                    </a>
+                    <a href="/mp" class="flex items-center px-4 py-3 text-gray-300 hover:bg-maltheus-primary hover:text-white">
+                        <i class="fas fa-truck mr-3"></i>
+                        <span class="nav-text">Recebimento</span>
+                    </a>
+                    <a href="{{ url_for('venda_sucesso') }}" class="flex items-center px-4 py-3 text-gray-300 hover:bg-maltheus-primary hover:text-white">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        <span class="nav-text">Vendas</span>
+                    </a>
+                    <a href="/clientes" class="flex items-center px-4 py-3 text-gray-300 hover:bg-maltheus-primary hover:text-white">
+                        <i class="fas fa-users mr-3"></i>
+                        <span class="nav-text">Clientes</span>
+                    </a>
+                    <a href="{{ url_for('detalhes_produto') }}" class="flex items-center px-4 py-3 text-gray-300 hover:bg-maltheus-primary hover:text-white">
+                        <i class="fas fa-cog mr-3"></i>
+                        <span class="nav-text">Configurações</span>
+                    </a>
+                </nav>
+                
+                <div class="px-4 py-2 text-gray-300 uppercase text-xs font-semibold mt-6">Cervejas</div>
+                <div class="px-4 py-2">
+                    <div class="flex items-center px-2 py-1 text-gray-300 hover:text-white cursor-pointer">
+                        <i class="fas fa-circle text-xs mr-2" style="color: #F59E0B;"></i>
+                        <span class="nav-text">Maltheus IPA</span>
+                    </div>
+                    <div class="flex items-center px-2 py-1 text-gray-300 hover:text-white cursor-pointer">
+                        <i class="fas fa-circle text-xs mr-2" style="color: #FEF3C7;"></i>
+                        <span class="nav-text">Maltheus Pilsen</span>
+                    </div>
+                    <div class="flex items-center px-2 py-1 text-gray-300 hover:text-white cursor-pointer">
+                        <i class="fas fa-circle text-xs mr-2" style="color: #7C2D12;"></i>
+                        <span class="nav-text">Maltheus Stout</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-700">
+                <div class="flex items-center">
+                    <img src={{ url_for('static', filename='perfil.png') }} alt="User" class="w-10 h-10 rounded-full">
+                    <div class="ml-3 nav-text">
+                        <div class="font-medium">Mateus Ribeiro</div>
+                        <div class="text-xs text-gray-400">Admin</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content flex-1 overflow-y-auto">
+            <!-- Top Bar -->
+            <header class="bg-white shadow-sm">
+                <div class="px-6 py-4 flex items-center justify-between">
+                    <h1 class="text-2xl font-bold text-gray-800">Dashboard</h1>
+                    <div class="flex items-center space-x-4">
+<!-- No header -->
+<div class="relative">
+    <a href="#notificacoes" class="p-2 text-gray-500 hover:text-gray-700 relative">
+        <i class="fas fa-bell"></i>
+        {% if producoes_pendentes_count > 0 %}
+        <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+        {% endif %}
+    </a>
+    
+    <!-- Dropdown de notificações -->
+    <div id="notificacoes" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-10">
+        <div class="p-4 border-b">
+            <h3 class="font-bold">Produções Pendentes</h3>
+        </div>
+        <div class="max-h-60 overflow-y-auto">
+            {% for producao in producoes_pendentes %}
+            <div class="p-4 border-b hover:bg-gray-50">
+                <p class="font-medium">Lote {{ producao.lote }} - {{ producao.tipo_cerveja }}</p>
+                <p class="text-sm text-gray-500">Concluído em {{ producao.fim_producao.strftime('%d/%m/%Y') }}</p>
+                <form method="post" action="{{ url_for('confirmar_entrada', id=producao.id) }}" class="mt-2">
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded text-sm">
+                        Confirmar Entrada
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <p class="p-4 text-gray-500">Nenhuma produção pendente</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Dashboard Content -->
+            <main class="p-6">
+                <!-- Welcome Banner -->
+                <div class="bg-gradient-to-r from-maltheus-dark to-maltheus-primary rounded-xl p-6 mb-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold">Bem-vindo, Mateus!</h2>
+                            <p class="mt-2">Acompanhe o desempenho da Maltheus Brew e gerencie sua produção artesanal.</p>
+                        </div>
+                        <div class="beer-bottle">
+                            <img src="{{ url_for('static', filename='logo.png') }}" 
+                                alt="Logo" 
+                                class="h-24 opacity-20 object-contain">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div class="dashboard-card bg-white rounded-xl shadow p-6 transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Valor do Estoque</p>
+                                <h3 class="text-2xl font-bold mt-1">R$ {{ "%.2f"|format(estoque_valor_total) }}</h3>
+                            </div>
+                            <div class="p-3 rounded-full bg-maltheus-light text-maltheus-primary">
+                                <i class="fas fa-industry text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card bg-white rounded-xl shadow p-6 transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Vendas Mensais</p>
+                                <h3 class="text-2xl font-bold mt-1">R$ {{ "%.2f"|format(total_vendas) }}</h3>
+                                {% if porcentagem_vendas > 0 %}
+                                    <p class="text-green-500 text-sm mt-1">
+                                        <i class="fas fa-arrow-up mr-1"></i> {{ "%.2f"|format(porcentagem_vendas) }}% desde o mês passado
+                                    </p>
+                                {% else %}
+                                    <p class="text-red-500 text-sm mt-1">
+                                        <i class="fas fa-arrow-down mr-1"></i> {{ "%.2f"|format(porcentagem_vendas|abs) }}% desde o mês passado
+                                    </p>
+                                {% endif %}
+                            </div>
+                            <div class="p-3 rounded-full bg-blue-100 text-blue-500">
+                                <i class="fas fa-shopping-cart text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dashboard-card bg-white rounded-xl shadow p-6 transition duration-300">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500">Clientes Ativos</p>
+                                <h3 class="text-2xl font-bold mt-1">{{ clientes_ativos }}</h3>
+                                {% if variacao_clientes > 0 %}
+                                    <p class="text-green-500 text-sm mt-1">
+                                        <i class="fas fa-arrow-up mr-1"></i> 
+                                        {{ variacao_clientes|abs }} novos ({{ "%.2f"|format(porcent_clientes) }}%)
+                                    </p>
+                                {% elif variacao_clientes < 0 %}
+                                    <p class="text-red-500 text-sm mt-1">
+                                        <i class="fas fa-arrow-down mr-1"></i> 
+                                        {{ variacao_clientes|abs }} redução ({{ "%.2f"|format(porcent_clientes) }}%)
+                                    </p>
+                                {% else %}
+                                    <p class="text-gray-500 text-sm mt-1">Sem alteração</p>
+                                {% endif %}
+                            </div>
+                            <div class="p-3 rounded-full bg-green-100 text-green-500">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                <div class="dashboard-card bg-white rounded-xl shadow p-6 transition duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500">Perda de Estoque</p>
+                            <h3 class="text-2xl font-bold mt-1">R$ {{ "%.2f"|format(custo_perdas) }}</h3>
+                            <p class="text-red-500 text-sm mt-1">
+                                <i class="fas fa-arrow-down mr-1"></i> 
+                                {{ perdas_count }} registro(s) de perda
+                            </p>
+                        </div>
+                        <div class="p-3 rounded-full bg-red-100 text-red-500">
+                            <i class="fas fa-clock text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <!-- Production Chart -->
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-bold text-lg">Venda por Região</h3>
+                            <select class="border rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-maltheus-primary">
+                                <option>Últimos 6 meses</option>
+                            </select>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="vendasRegiaoChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="bg-white rounded-xl shadow p-6">
+                        <h3 class="font-bold text-lg mb-4">Atividades Recentes</h3>
+                        <div class="space-y-4">
+                            {% for atividade in atividades_recentes %}
+                            <div class="flex items-start">
+                                <div class="p-2 {{ atividade.cor }} rounded-full mr-3">
+                                    <i class="fas {{ atividade.icone }}"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium">{{ atividade.mensagem }}</p>
+                                    <p class="text-xs text-gray-500">{{ atividade.data.strftime('%d/%m/%Y %H:%M') }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Orders and Top Products -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Recent Orders -->
+                    <div class="bg-white rounded-xl shadow overflow-hidden">
+                        <div class="p-6 border-b">
+                            <h3 class="font-bold text-lg">Pedidos Recentes</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pedido</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Região</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                    </tr>
+                                </thead>
+                                    <!-- Dentro da tabela de Pedidos Recentes -->
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        {% for pedido in pedidos_recentes %}
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-maltheus-dark">{{ pedido.numero_pedido }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ pedido.cliente }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                {% set estado = pedido.cidade_estado.split('- ')[1] %}
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    {% if estado == 'SP' %}bg-blue-100 text-blue-800
+                                                    {% elif estado == 'RJ' %}bg-yellow-100 text-yellow-800
+                                                    {% elif estado == 'MG' %}bg-green-100 text-green-800
+                                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                                    {{ estado }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ pedido.valor_total }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                            </table>
+                        </div>
+                        <div class="p-4 border-t text-center">
+                            <a href="/vendas" class="text-maltheus-primary font-medium hover:underline">Ver todos os pedidos</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Top Products -->
+                    <div class="bg-white rounded-xl shadow overflow-hidden">
+                        <div class="p-6 border-b">
+                            <h3 class="font-bold text-lg">Cervejas Mais Vendidas</h3>
+                        </div>
+                            <div class="divide-y divide-gray-200">
+                                {% for cerveja in top_cervejas %}
+                                <div class="p-4 flex items-center">
+                                    <div class="w-10 h-10 rounded-full 
+                                        {% if cerveja[0] == 'ipa' %}bg-amber-900
+                                        {% elif cerveja[0] == 'stout' %}bg-amber-800
+                                        {% elif cerveja[0] == 'pilsen' %}bg-amber-600
+                                        {% else %}bg-amber-900{% endif %} 
+                                        flex items-center justify-center mr-3">
+                                        <i class="fas fa-beer text-white"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="font-medium">Maltheus {{ cerveja[0]|upper }}</h4>
+                                        <p class="text-sm text-gray-500">
+                                            {% if cerveja[0] == 'ipa' %}India Pale Ale
+                                            {% elif cerveja[0] == 'stout' %}Irish Stout
+                                            {% elif cerveja[0] == 'pilsen' %}Pilsen Premium
+                                            {% else %}{{ cerveja[0] }}{% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-medium">{{ cerveja[1] }} vendas</p>
+                                        <p class="text-sm text-green-500">+0% este mês</p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        <div class="p-4 border-t text-center">
+                            <a href="/cervejas" class="text-maltheus-primary font-medium hover:underline">Ver todas as cervejas</a>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+    // Configuração do gráfico de vendas por região
+    const ctx = document.getElementById('vendasRegiaoChart').getContext('2d');
+    const vendasData = {{ vendas_por_mes_uf | tojson }};
+
+    // Mapeamento de cores para UFs
+    const ufColors = {
+        'SP': '#3B82F6',
+        'RJ': '#F59E0B',
+        'MG': '#10B981',
+        'BA': '#8B5CF6',
+        'Outros': '#6B7280'
+    };
+
+    // Preparar datasets
+    const datasets = [];
+    const meses = vendasData.map(mes => mes.nome.toUpperCase());
+    
+    // Coletar todas as UFs únicas
+    const allUFs = new Set();
+    vendasData.forEach(mes => {
+        mes.ufs.forEach(uf => allUFs.add(uf.uf));
+    });
+
+    // Criar um dataset para cada UF
+    Array.from(allUFs).forEach(uf => {
+        datasets.push({
+            label: uf,
+            data: vendasData.map(mes => {
+                const found = mes.ufs.find(item => item.uf === uf);
+                return found ? found.qtd : 0;
+            }),
+            backgroundColor: ufColors[uf] || ufColors['Outros'],
+            borderWidth: 0
+        });
+    });
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: meses,
+            datasets: datasets
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    stacked: false,
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    grid: { color: '#F3F4F6' }
+                }
+            },
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const label = context.dataset.label || '';
+                            return `${label}: ${context.parsed.y} unidades`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+        document.querySelector('[href="#notificacoes"]').addEventListener('click', function(e) {
+        e.preventDefault();
+        const dropdown = document.getElementById('notificacoes');
+        dropdown.classList.toggle('hidden');
+    });
+    </script>
+</body>
+</html>

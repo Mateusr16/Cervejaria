@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venda Confirmada</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f39c12;
+            animation: confetti 5s ease-out forwards;
+            z-index: 9999;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-50 to-blue-100 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full">
+        <!-- Card principal -->
+        <div class="bg-white rounded-xl shadow-xl overflow-hidden transition-all duration-300 card-hover">
+            <!-- Cabeçalho com gradiente -->
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white text-center">
+                <div class="w-20 h-20 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-4xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold">Venda Confirmada!</h1>
+                <p class="opacity-90 mt-2">Obrigado por comprar conosco</p>
+            </div>
+            
+            <!-- Conteúdo -->
+            <div class="p-8 text-center">
+                <div class="flex justify-center mb-6">
+                    <div class="relative">
+                        <div class="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center">
+                            <i class="fas fa-check-circle text-5xl text-green-600"></i>
+                        </div>
+                        <div class="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-white text-sm font-bold shadow-lg">
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+                    Sua compra foi efetuada com sucesso!
+                </h2>
+                
+                <p class="text-gray-600 mb-6">
+                    O recibo e detalhes da compra foram enviados para seu e-mail. 
+                    Caso precise de ajuda, nossa equipe está à disposição.
+                </p>
+                
+                <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 mb-6 text-left">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle text-blue-500 mr-3 text-xl"></i>
+                        <div>
+                            <h4 class="font-medium text-blue-800">Dica:</h4>
+                            <p class="text-blue-600 text-sm mt-1">
+                Acompanhe seus pedidos na área do cliente. Você pode rastrear a entrega a qualquer momento.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row justify-center gap-4 mt-8">
+                    <a href="{{ url_for('index') }}" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2">
+                        <i class="fas fa-home"></i> Voltar ao início
+                    </a>
+                    <a href="#" class="px-8 py-3 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg font-medium transition-all duration-300 flex items-center justify-center gap-2">
+                        <i class="fas fa-receipt"></i> Ver detalhes
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Rodapé -->
+            <div class="bg-gray-50 px-6 py-4 text-center border-t border-gray-100">
+                <p class="text-sm text-gray-500">
+                    Precisa de ajuda? <a href="#" class="text-emerald-600 hover:text-emerald-700 font-medium">Fale conosco</a>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Mensagem de agradecimento adicional -->
+        <div class="mt-6 text-center text-gray-500 text-sm">
+            <p>Obrigado por escolher nossa loja! ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        // Efeito de confete ao carregar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            const colors = ['#f39c12', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6', '#f1c40f'];
+            
+            // Cria 50 confetes
+            for (let i = 0; i < 50; i++) {
+                createConfetti(colors);
+            }
+        });
+
+        function createConfetti(colors) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            
+            // Configurações aleatórias para cada confete
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const size = Math.random() * 10 + 5;
+            const posX = Math.random() * window.innerWidth;
+            const delay = Math.random() * 5;
+            
+            confetti.style.backgroundColor = color;
+            confetti.style.width = `${size}px`;
+            confetti.style.height = `${size}px`;
+            confetti.style.left = `${posX}px`;
+            confetti.style.top = `-10px`;
+            confetti.style.animationDelay = `${delay}s`;
+            
+            // Adiciona borda redonda ou não aleatoriamente
+            if (Math.random() > 0.5) {
+                confetti.style.borderRadius = '50%';
+            }
+            
+            // Adiciona rotação aleatória
+            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+            
+            document.body.appendChild(confetti);
+            
+            // Remove o confete após a animação terminar
+            setTimeout(() => {
+                confetti.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

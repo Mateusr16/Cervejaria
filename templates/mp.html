@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Estoque - Matéria-Prima</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .custom-shadow { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+        .custom-shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Status indicators */
+        .status-normal { background-color: rgba(74, 222, 128, 0.1); }
+        .status-atencao { background-color: rgba(250, 204, 21, 0.1); }
+        .status-critico { background-color: rgba(248, 113, 113, 0.1); }
+
+        .remove-product {
+            transition: all 0.2s;
+            padding: 4px;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 10;
+        }
+
+        .remove-product:hover {
+            background-color: rgba(248, 113, 113, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with improved styling -->
+        <header class="mb-8 text-center">
+            <div class="inline-flex items-center justify-center p-4 bg-white rounded-full shadow-md mb-4">
+                <i class="fas fa-boxes-stacked text-blue-500 text-4xl"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+                Gestão de Estoque - Matéria-Prima
+            </h1>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Controle completo de entradas, saídas e saldo atual com visualização intuitiva
+            </p>
+        </header>
+
+        <!-- New Entry Section with improved card design -->
+        <div class="max-w-4xl mx-auto bg-white rounded-xl custom-shadow-lg p-8 mb-8 fade-in border border-gray-100">
+            <div class="flex items-center mb-6">
+                <div class="bg-green-100 p-3 rounded-full mr-4">
+                    <i class="fas fa-dolly text-green-600 text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-semibold text-gray-800">Nova Entrada</h2>
+            </div>
+
+            <form action="#" method="post" class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Nota Fiscal -->
+                    <div>
+                        <label for="nf" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-file-invoice mr-2 text-blue-500"></i> Nota Fiscal
+                        </label>
+                        <input type="text" id="nf" name="nf" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm"
+                            placeholder="Número da NF">
+                    </div>
+
+                    <!-- Data -->
+                    <div>
+                        <label for="data" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-calendar-day mr-2 text-blue-500"></i> Data
+                        </label>
+                        <input type="datetime-local" id="data" name="data" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm">
+                    </div>
+
+                    <!-- Fornecedor -->
+                    <div>
+                        <label for="fornecedor" class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                            <i class="fas fa-truck mr-2 text-blue-500"></i> Fornecedor
+                        </label>
+                        <select id="fornecedor" name="fornecedor" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm">
+                            <option value="" disabled selected>Selecione o fornecedor</option>
+                            <option value="Brew House">Brew House</option>
+                            <option value="Lamas Brew Shop">Lamas Brew Shop</option>
+                            <option value="Piquiri Brew Shop">Piquiri Brew Shop</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Seção Dinâmica de Produtos with better spacing -->
+                <div id="product-entries" class="space-y-6">
+                    <div class="product-entry grid grid-cols-1 md:grid-cols-3 gap-6 bg-gray-50 p-4 rounded-lg relative">
+                        <button type="button" class="absolute top-2 right-2 text-red-500 hover:text-red-700 remove-product hidden">
+                            <i class="fas fa-trash text-sm"></i>
+                        </button>
+                        <!-- Produto -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-cube mr-2 text-blue-500"></i> Matéria-Prima
+                            </label>
+                            <select name="produto[]" required
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm">
+                                <option value="" disabled selected>Selecione o produto</option>
+                                <option value="Malte Pilsen">Malte Pilsen</option>
+                                <option value="Malte Pale Ale">Malte Pale Ale</option>
+                                <option value="Malte Caramelo">Malte Caramelo</option>
+                                <option value="Malte Torrado">Malte Torrado</option>
+                                <option value="Cevada em Flocos">Cevada em Flocos</option>
+                                <option value="Lúpulo">Lúpulo</option>
+                                <option value="Levedura">Levedura</option>
+                                <option value="Água Mineral">Água Mineral</option>
+                            </select>
+                        </div>
+
+                        <!-- Quantidade -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-weight-hanging mr-2 text-blue-500"></i> Quantidade (kg)
+                            </label>
+                            <div class="relative">
+                                <input type="number" name="quantidade[]" step="0.1" required
+                                    class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm"
+                                    placeholder="Ex: 50,5">
+                                <span class="absolute right-3 top-3 text-gray-500 text-sm">kg</span>
+                            </div>
+                        </div>
+
+                        <!-- Valor -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-dollar-sign mr-2 text-blue-500"></i> Valor por kg
+                            </label>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-gray-500 text-sm">R$</span>
+                                <input type="number" name="valor_por_kg[]" step="0.01" required
+                                    class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition text-sm"
+                                    placeholder="0,00">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botão para Adicionar Mais Produtos with better styling -->
+                <button type="button" id="add-product"
+                    class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center border border-gray-200">
+                    <i class="fas fa-plus-circle mr-2 text-blue-500"></i> Adicionar Produto
+                </button>
+
+                <button type="submit"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 flex items-center justify-center shadow-md">
+                    <i class="fas fa-save mr-2"></i> Registrar Entrada
+                </button>
+            </form>
+        </div>
+
+        <!-- Saldo Atual with improved table design -->
+        <div class="max-w-6xl mx-auto bg-white rounded-xl custom-shadow-lg p-6 mb-8 fade-in border border-gray-100">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                    <i class="fas fa-box-open text-blue-500 mr-3"></i>
+                    Saldo Atual
+                </h2>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-gray-500">Legenda:</span>
+                    <span class="text-xs text-green-500 flex items-center"><span class="w-2 h-2 bg-green-500 rounded-full mr-1"></span> Normal</span>
+                    <span class="text-xs text-yellow-500 flex items-center"><span class="w-2 h-2 bg-yellow-500 rounded-full mr-1"></span> Atenção</span>
+                    <span class="text-xs text-red-500 flex items-center"><span class="w-2 h-2 bg-red-500 rounded-full mr-1"></span> Crítico</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="w-full table-auto border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-sm font-medium text-gray-700">
+                            <th class="px-6 py-4 text-left w-1/4">PRODUTO</th>
+                            <th class="px-6 py-4 text-center">ESTOQUE ATUAL</th>
+                            <th class="px-6 py-4 text-center">ÚLTIMA ENTRADA</th>
+                            <th class="px-6 py-4 text-center">ÚLTIMA SAÍDA</th>
+                            <th class="px-6 py-4 text-center">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-gray-600 divide-y divide-gray-200">
+                        {% for produto in produtos_mp %}
+                        {% set estoque = estoque_mp[produto] %}
+                        {% set ultima_entrada = ultimas_entradas.get(produto, {'data': '-', 'quantidade': '-'}) %}
+                        {% set ultima_saida = ultimas_saidas.get(produto, {'data': '-', 'quantidade': '-'}) %}
+                        
+                        <tr class="hover:bg-gray-50
+                            {% if estoque > (minimos[produto] * 1.2) %} status-normal
+                            {% elif estoque >= minimos[produto] %} status-atencao
+                            {% else %} status-critico
+                            {% endif %}">
+                            <td class="px-6 py-4 font-semibold">
+                                <div class="flex items-center">
+                                    <i class="fas fa-cube text-gray-400 mr-3"></i>
+                                    <div>
+                                        {{ produto }}
+                                        <div class="text-xs text-gray-500 mt-1">Cód: MP{{ "%03d" % loop.index }}</div>
+                                    </div>
+                                </div>
+
+                            <td class="px-6 py-4 text-center">
+                                <div class="font-medium">{{ estoque }} kg</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    Min: 
+                                    <input type="number" 
+                                        name="minimo_{{ produto }}" 
+                                        value="{{ minimos[produto] }}"
+                                        class="w-20 px-2 py-1 border rounded text-sm"
+                                        onchange="atualizarMinimo('{{ produto }}', this.value)">
+                                </div>
+                            </td>
+
+                            <td class="px-6 py-4 text-center">
+                                <div>{{ ultima_entrada.data.strftime('%d/%m/%Y') if ultima_entrada.data else '-' }}</div>
+                                <div class="text-xs text-gray-500 mt-1">{{ ultima_entrada.quantidade }} kg</div>
+                            </td>
+
+                            <td class="px-6 py-4 text-center">
+                                <div>{{ ultima_saida.data.strftime('%d/%m/%Y') if ultima_saida.data else '-' }}</div>
+                                <div class="text-xs text-gray-500 mt-1">{{ ultima_saida.quantidade }} kg</div>
+                            </td>
+
+                            <td class="px-6 py-4 text-center">
+                                {% if estoque > (minimos[produto] * 1.2) %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check-circle mr-1"></i> Normal
+                                    </span>
+                                {% elif estoque > minimos[produto] %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i> Atenção
+                                    </span>
+                                {% else %}
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                        <i class="fas fa-times-circle mr-1"></i> Crítico
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Histórico de Estoque with improved chart section -->
+        <div class="max-w-7xl mx-auto bg-white rounded-xl custom-shadow-lg p-6 mb-8 fade-in border border-gray-100">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <h2 class="text-2xl font-semibold text-gray-800 flex items-center mb-4 md:mb-0">
+                    <i class="fas fa-chart-line text-blue-500 mr-3"></i>
+                    Histórico de Estoque
+                </h2>
+
+            </div>
+            <div class="bg-gray-50 p-4 rounded-lg">
+                <canvas id="graficoUnico" height="400"></canvas>
+            </div>
+        </div>
+
+        <!-- Histórico de Movimentações with improved table design -->
+        <div class="max-w-7xl mx-auto bg-white rounded-xl custom-shadow-lg p-6 mb-8 fade-in border border-gray-100">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-6 flex items-center">
+                <i class="fas fa-history text-blue-500 mr-3"></i>
+                Histórico de Movimentações
+            </h2>
+
+            <div class="overflow-x-auto rounded-lg border border-gray-200">
+                <table class="w-full table-auto border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-sm font-medium text-gray-700">
+                            <th class="px-6 py-4 text-left">NF</th>
+                            <th class="px-6 py-4 text-left">Data</th>
+                            <th class="px-6 py-4 text-left">Produto</th>
+                            <th class="px-6 py-4 text-center">Quantidade</th>
+                            <th class="px-6 py-4 text-left">Fornecedor</th>
+                            <th class="px-6 py-4 text-left">Valor</th>
+                            <th class="px-6 py-4 text-left">Responsável</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm text-gray-600 divide-y divide-gray-200">
+                        {% for movimento in historico.items %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 font-medium">{{ movimento.nf }}</td>
+                            <td class="px-6 py-4">{{ movimento.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-cube text-gray-400 mr-2"></i>
+                                    {{ movimento.produto }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                    {{ movimento.quantidade }} kg
+                                </span>
+                            </td>
+                            <td class="px-6 py-4">{{ movimento.fornecedor }}</td>
+                            <td class="px-6 py-4 font-medium">R$ {{ movimento.valor }} ({{ "%.2f"|format((movimento.valor|float) / (movimento.quantidade|float)) }}/kg)</td>                            <td class="px-6 py-4">
+                                <div class="flex items-center">
+                                    <i class="fas fa-user-circle text-gray-400 mr-2"></i>
+                                    {{ movimento.responsavel }}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginação melhorada -->
+            <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-sm text-gray-600">
+                    Mostrando página {{ historico.page }} de {{ historico.pages }} (Total: {{ historico.total }} registros)
+                </div>
+                <div class="flex items-center gap-2">
+                    {% if historico.has_prev %}
+                        <a href="{{ url_for('gestao_mp', page=historico.prev_num) }}"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center">
+                            <i class="fas fa-chevron-left mr-2"></i> Anterior
+                        </a>
+                    {% endif %}
+                    
+                    {% if historico.has_next %}
+                        <a href="{{ url_for('gestao_mp', page=historico.next_num) }}"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center">
+                            Próxima <i class="fas fa-chevron-right ml-2"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+                    <div class="text-center">
+            <a href="{{ url_for('index') }}"
+                class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
+                <i class="fas fa-home mr-2"></i> Voltar ao Início
+            </a>
+        </div>
+        </div>
+
+        <!-- Script para Campos Dinâmicos (mantido igual) -->
+<script>
+    // Dados do Flask
+    const dadosGraficos = {{ dados_graficos | tojson }};
+    const produtosMP = {{ produtos_mp | tojson }};
+    const cores = ['#4CAF50', '#2196F3', '#9C27B0', '#FF9800', '#E91E63', '#00BCD4', '#8BC34A', '#673AB7'];
+
+    let chartInstance = null;
+
+    function renderizarGrafico() {
+        const ctx = document.getElementById('graficoUnico').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+
+        // Usar dados do primeiro produto para as datas (são as mesmas para todos)
+        const primeiroProduto = produtosMP[0];
+        const labels = dadosGraficos[primeiroProduto]?.datas || [];
+        
+        const datasets = produtosMP.map((produto, index) => {
+            const dados = dadosGraficos[produto] || { valores: [] };
+            return {
+                label: produto,
+                data: dados.valores,
+                borderColor: cores[index % cores.length],
+                backgroundColor: cores[index % cores.length] + '20',
+                borderWidth: 2,
+                pointRadius: 3,
+                pointHoverRadius: 5,
+                fill: true,
+                tension: 0.3
+            };
+        });
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Evolução do Estoque - Últimos 30 Dias',
+                        font: { size: 16 }
+                    },
+                    legend: {
+                        position: 'top',
+                        labels: { boxWidth: 12, padding: 20, usePointStyle: true }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: { size: 14 }, bodyFont: { size: 12 },
+                        padding: 12, usePointStyle: true
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        title: {
+                            display: true,
+                            text: 'Dias',
+                            font: { weight: 'bold' }
+                        }
+                    },
+                    y: {
+                        grid: { color: '#e5e7eb' },
+                        title: {
+                            display: true,
+                            text: 'Quantidade (kg)',
+                            font: { weight: 'bold' }
+                        },
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Inicializar o gráfico
+    renderizarGrafico();
+
+            // --- Other existing functions (atualizarMinimo, dynamic product entry, etc.) ---
+            function atualizarMinimo(produto, valor) {
+                fetch('/atualizar_minimos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `minimo_${encodeURIComponent(produto)}=${encodeURIComponent(valor)}`
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Falha na atualização');
+                    return response.text();
+                })
+                .then(() => {
+                    location.reload(); // Reload to reflect changes
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao atualizar o estoque mínimo');
+                });
+            }
+
+            // Add product entry logic
+            document.querySelectorAll('input[name="quantidade[]"], input[name="valor_por_kg[]"]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const entry = this.closest('.product-entry');
+                    const qtdInput = entry.querySelector('input[name="quantidade[]"]');
+                    const valorKgInput = entry.querySelector('input[name="valor_por_kg[]"]');
+                    if (!qtdInput || !valorKgInput) return; // Safety check
+
+                    const qtd = qtdInput.value;
+                    const valorKg = valorKgInput.value;
+
+                    if(qtd && valorKg) {
+                        try {
+                           const total = (parseFloat(qtd) * parseFloat(valorKg)).toFixed(2);
+                           // Maybe display total somewhere?
+                        } catch (e) {
+                           console.error("Error calculating total:", e);
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('add-product').addEventListener('click', function() {
+                const productEntries = document.getElementById('product-entries');
+                const firstEntry = productEntries.querySelector('.product-entry'); // Find the first one specifically
+                 if (!firstEntry) return; // Should not happen, but safety check
+
+                const newEntry = firstEntry.cloneNode(true);
+
+                // Show remove button on the new clone
+                const removeButton = newEntry.querySelector('.remove-product');
+                if (removeButton) removeButton.classList.remove('hidden');
+
+                // Clear values in the new clone
+                newEntry.querySelectorAll('input').forEach(input => input.value = '');
+                const selectElement = newEntry.querySelector('select');
+                if (selectElement) selectElement.selectedIndex = 0;
+
+                productEntries.appendChild(newEntry);
+
+                 // Ensure the remove button on the *first* entry is hidden if it's the only one
+                 // And ensure it's shown if more than one exists
+                 const allEntries = productEntries.querySelectorAll('.product-entry');
+                 allEntries.forEach((entry, index) => {
+                     const btn = entry.querySelector('.remove-product');
+                     if (btn) {
+                         if (allEntries.length > 1) {
+                             btn.classList.remove('hidden');
+                         } else {
+                             btn.classList.add('hidden');
+                         }
+                     }
+                 });
+            });
+
+            // Delegate remove event
+            document.getElementById('product-entries').addEventListener('click', function(e) {
+                const removeButton = e.target.closest('.remove-product');
+                if(removeButton) {
+                    const entry = removeButton.closest('.product-entry');
+                    const productEntriesContainer = document.getElementById('product-entries');
+                    // Only allow removal if more than one entry exists
+                    if(productEntriesContainer.querySelectorAll('.product-entry').length > 1) {
+                        entry.remove();
+                         // After removing, check if only one is left and hide its remove button
+                         const remainingEntries = productEntriesContainer.querySelectorAll('.product-entry');
+                         if (remainingEntries.length === 1) {
+                             const lastRemoveButton = remainingEntries[0].querySelector('.remove-product');
+                             if (lastRemoveButton) lastRemoveButton.classList.add('hidden');
+                         }
+                    }
+                }
+            });
+
+             // Ensure the remove button on the first item is hidden initially if it's the only one
+             document.addEventListener('DOMContentLoaded', () => {
+                 const productEntriesInitial = document.getElementById('product-entries');
+                 if (productEntriesInitial) {
+                    const allEntriesInitial = productEntriesInitial.querySelectorAll('.product-entry');
+                    allEntriesInitial.forEach((entry, index) => {
+                        const btn = entry.querySelector('.remove-product');
+                        if (btn) {
+                            if (allEntriesInitial.length > 1) {
+                                btn.classList.remove('hidden');
+                            } else {
+                                btn.classList.add('hidden');
+                            }
+                        }
+                    });
+                 }
+             });
+
+        </script>
+    </div>
+</body>
+</html>
