@@ -1364,18 +1364,18 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
         print("Coluna já existe:", str(e))
-    
+
     # Adicione estas matérias-primas
     produtos_mp = [
         'Malte Pilsen', 'Malte Pale Ale', 'Malte Caramelo',
-        'Malte Torrado', 'Cevada em Flocos', 'Lúpulo', 
+        'Malte Torrado', 'Cevada em Flocos', 'Lúpulo',
         'Levedura', 'Água Mineral'
     ]
-    
+
     for produto in produtos_mp:
         if not EstoqueMinimo.query.filter_by(produto=produto).first():
             db.session.add(EstoqueMinimo(produto=produto, minimo=100.0))
-    
+
     db.session.commit()
 
     # Inicializar dados padrão se não existirem
@@ -1386,7 +1386,7 @@ with app.app_context():
             Produto(nome='stout', custo=5.00, venda=7.00)
         ]
         db.session.bulk_save_objects(produtos_iniciais)
-    
+
     if not Desconto.query.first():
         descontos_iniciais = [
             Desconto(valor_minimo=4000, percentual=10),
@@ -1394,7 +1394,7 @@ with app.app_context():
             Desconto(valor_minimo=6000, percentual=15)
         ]
         db.session.bulk_save_objects(descontos_iniciais)
-    
+
     if not TaxaEntrega.query.first():
         taxas_iniciais = [
             TaxaEntrega(estados='RJ,SP', taxa=5),
@@ -1404,8 +1404,10 @@ with app.app_context():
         ]
         db.session.bulk_save_objects(taxas_iniciais)
 
-    
+
     db.session.commit()
 
+from waitress import serve
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    serve(app, host='0.0.0.0', port=5000)
