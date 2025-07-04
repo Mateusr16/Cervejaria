@@ -65,7 +65,7 @@ class TaxaEntrega(db.Model):
 # Definição do modelo do banco de dados para os pedidos
 class Pedido(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    numero_pedido = db.Column(db.Integer, unique=True, nullable=True)
+    numero_pedido = db.Column(db.String, unique=True, nullable=True)
     data = db.Column(db.String(20), nullable=False)  # Aumentado para incluir hora
     cliente = db.Column(db.String(80), nullable=False)
     vendedor = db.Column(db.String(80), nullable=False)
