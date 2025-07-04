@@ -1,74 +1,181 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Vendas Confirmados</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .flash {
+            animation: fadeIn 0.5s, fadeOut 0.5s 2.5s;
+            animation-fill-mode: forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        .success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+        
+        .error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .info {
+            background-color: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+        
+        .warning {
+            background-color: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid #f59e0b;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800">Lista de Vendas Confirmadas</h1>
+                <p class="text-gray-600 mt-2">Visualize todas as vendas confirmadas do sistema</p>
+            </div>
+            <a href="{{ url_for('index') }}" class="mt-4 md:mt-0 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i> Voltar para o Orçamento
+            </a>
+        </div>
 
-{% block title %}Lista de Vendas Confirmados{% endblock %}
-
-{% block content %}
-<div class="container">
-    <h1>Lista de Vendas Confirmados</h1>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="flash {{ category }}">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    {% if vendas %}  
-		<style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: left;
-            }
-            th {
-                background-color: #f2f2f2;
-                font-weight: bold;
-            }
-            tr:nth-child(even) {
-                background-color: #f9f9f9;
-            }
-            ul {
-                margin: 0;
-                padding-left: 20px;
-            }
-        </style>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Número do Pedido</th>  <th>Data</th>
-                        <th>Cliente</th>
-                        <th>Valor Bruto</th>
-                        <th>Desconto</th>
-                        <th>Entrega</th>
-                        <th>Valor Final</th>
-                        <th>Vendedor</th>
-                        <th>Cidade - Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for venda in vendas %}  
-                        <tr>
-                            <td>{{ venda.numero_pedido }}</td>  <td>{{ venda.data }}</td>  
-                            <td>{{ venda.cliente }}</td> 
-                            <td>{{ venda.subtotal }}</td> 
-                            <td>{{ venda.desconto_pct }} ({{ venda.desconto_val }})</td>
-                            <td>{{ venda.entrega_pct }} ({{ venda.entrega_val }})</td>
-                            <td>{{ venda.valor_total }}</td> 
-                            <td>{{ venda.vendedor }}</td>
-                            <td>{{ venda.cidade_estado }}</td>
-                        </tr>
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2 mb-6">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }} px-4 py-3 rounded-lg shadow-sm flex items-start">
+                            {% if category == 'success' %}
+                                <i class="fas fa-check-circle mr-3 mt-1"></i>
+                            {% elif category == 'error' %}
+                                <i class="fas fa-exclamation-circle mr-3 mt-1"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fas fa-exclamation-triangle mr-3 mt-1"></i>
+                            {% else %}
+                                <i class="fas fa-info-circle mr-3 mt-1"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
                     {% endfor %}
-                </tbody>
-            </table>
-    {% else %}
-        <p>Nenhuma venda confirmada ainda.</p>  {% endif %}
+                </div>
+            {% endif %}
+        {% endwith %}
 
-    <p><a href="{{ url_for('index') }}">Voltar para o Orçamento</a></p>
-</div>
-{% endblock %}
+        <!-- Sales Table -->
+        {% if vendas %}
+            <div class="bg-white rounded-xl shadow-md overflow-hidden mb-8">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pedido</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Bruto</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Desconto</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entrega</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Final</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localização</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for venda in vendas %}
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ venda.numero_pedido }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ venda.data }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ venda.cliente }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ venda.subtotal }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span class="text-red-500">{{ venda.desconto_pct }}</span>
+                                        <span class="block text-xs text-gray-400">(R$ {{ venda.desconto_val }})</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <span class="text-green-500">{{ venda.entrega_pct }}</span>
+                                        <span class="block text-xs text-gray-400">(R$ {{ venda.entrega_val }})</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">R$ {{ venda.valor_total }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ venda.vendedor }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ venda.cidade_estado }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% else %}
+            <div class="bg-white rounded-xl shadow-md p-8 text-center">
+                <i class="fas fa-clipboard-list text-5xl text-gray-300 mb-4"></i>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Nenhuma venda confirmada ainda</h3>
+                <p class="text-gray-500">Quando houver vendas confirmadas, elas aparecerão aqui.</p>
+            </div>
+        {% endif %}
+
+        <!-- Summary Cards -->
+        {% if vendas %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                            <i class="fas fa-shopping-cart text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Total de Vendas</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ vendas|length }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                            <i class="fas fa-dollar-sign text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Valor Total</p>
+                            <p class="text-2xl font-bold text-gray-900">
+                                R$ {{ vendas|sum(attribute='valor_total')|round(2) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex items-center">
+                        <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                            <i class="fas fa-truck text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-500">Média por Venda</p>
+                            <p class="text-2xl font-bold text-gray-900">
+                                R$ {{ (vendas|sum(attribute='valor_total')/vendas|length)|round(2) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
