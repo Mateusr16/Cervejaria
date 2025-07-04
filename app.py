@@ -8,8 +8,6 @@ from dateutil.relativedelta import relativedelta
 import os
 import re
 
-from flask_sqlalchemy import SQLAlchemy
-
 GARRAFAS_POR_LITRO = 3710 / 1000 
 
 app = Flask(__name__)
@@ -17,13 +15,10 @@ app.secret_key = 'chave_secreta_para_flash'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     'DATABASE_URL', # O Render já cria uma variável de ambiente 'DATABASE_URL' com a string de conexão do PostgreSQL
-    'postgresql://cervejaria_db_user:f0aRZjyre8kA6YkVye3F0Qqzlu7rR9yT@dpg-d1i6b6adbo4c7387plk0-a.oregon-postgres.render.com/cervejaria_db' # Este é o seu URL de fallback
+    'postgresql://estoque_qbx6_user:aBPs6ge2YlGEfRhDAyvXl9SaMwx8L0ks@dpg-d1js5sumcj7s73a9p9cg-a.oregon-postgres.render.com/estoque_qbx6' # Este é o seu URL de fallback
 )
 db = SQLAlchemy(app)
 
-with app.app_context():
-    db.drop_all()    # apaga todas as tabelas
-    db.create_all()  # recria com base no modelo atual
 
 RECEITAS = {
     "Pilsen": {
