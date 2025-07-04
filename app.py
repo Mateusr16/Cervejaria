@@ -15,7 +15,7 @@ app.secret_key = 'chave_secreta_para_flash'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     'DATABASE_URL',
-    'postgresql://estoque_qbx6_user:aBPs6ge2YlGEfRhDAyvXl9SaMwx8L0ks@dpg-d1js5sumcj7s73a9p9cg-a.oregon-postgres.render.com:5432/estoque_qbx6?sslmode=require'
+    ''postgresql://estoque_qbx6_user:aBPs6ge2YlGEfRhDAyvXl9SaMwx8L0ks@dpg-d1js5sumcj7s73a9p9cg-a.oregon-postgres.render.com:5432/estoque_qbx6?sslmode=require'
 )
 
 db = SQLAlchemy(app)
