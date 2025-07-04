@@ -8,6 +8,8 @@ from dateutil.relativedelta import relativedelta
 import os
 import re
 
+from flask_sqlalchemy import SQLAlchemy
+
 GARRAFAS_POR_LITRO = 3710 / 1000 
 
 app = Flask(__name__)
@@ -18,6 +20,10 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     'postgresql://cervejaria_db_user:f0aRZjyre8kA6YkVye3F0Qqzlu7rR9yT@dpg-d1i6b6adbo4c7387plk0-a.oregon-postgres.render.com/cervejaria_db' # Este é o seu URL de fallback
 )
 db = SQLAlchemy(app)
+
+with app.app_context():
+    db.drop_all()    # apaga todas as tabelas
+    db.create_all()  # recria com base no modelo atual
 
 RECEITAS = {
     "Pilsen": {
