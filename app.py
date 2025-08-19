@@ -13,9 +13,10 @@ GARRAFAS_POR_LITRO = 3710 / 1000
 app = Flask(__name__)
 app.secret_key = 'chave_secreta_para_flash'
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    'DATABASE_URL',
-    'postgresql://dados_cervejaria_user:48U96c8cBX1yJPIximRHAcELHnymCqcJ@dpg-d2i9jhvdiees73d3n980-a.oregon-postgres.render.com:5432/dados_cervejaria?sslmode=require'
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    "postgresql+psycopg2://dados_cervejaria_user:48U96c8cBX1yJPIximRHAcELHnymCqcJ"
+    "@dpg-d2i9jhvdiees73d3n980-a.oregon-postgres.render.com:5432/dados_cervejaria"
+    "?sslmode=require"
 )
 
 db = SQLAlchemy(app)
