@@ -14,8 +14,8 @@ app = Flask(__name__)
 app.secret_key = 'chave_secreta_para_flash'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = (
-    "postgresql+psycopg2://dados_cervejaria_user:48U96c8cBX1yJPIximRHAcELHnymCqcJ"
-    "@dpg-d2i9jhvdiees73d3n980-a.oregon-postgres.render.com:5432/dados_cervejaria"
+    "postgresql+psycopg2://cerverja_user:NWDyp8cbprya0crqXKAyKryVApxH2KIU"
+    "@dpg-d3tbaofdiees73ddeiu0-a.oregon-postgres.render.com:5432/cerverja"
     "?sslmode=require"
 )
 
